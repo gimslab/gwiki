@@ -18,7 +18,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "simple-git": "^3.30.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

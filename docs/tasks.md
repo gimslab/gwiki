@@ -15,8 +15,8 @@
   - [x] TypeScript, Express 등 라이브러리 설치
   - [x] `tsconfig.json` 설정
   - [x] `nodemon`을 이용한 개발 환경 구성
-- [ ] **프론트엔드 프로젝트 기본 설정:**
-  - [ ] `create-react-app` 또는 `Vite`를 이용한 React 프로젝트 생성
+- [x] **프론트엔드 프로젝트 기본 설정:**
+  - [x] `create-react-app` 또는 `Vite`를 이용한 React 프로젝트 생성
 
 ---
 
@@ -26,29 +26,29 @@
   - [x] 환경변수 설정 (`dotenv`, `src/config.ts`)
   - [x] `POST /api/auth/login` 엔드포인트 구현
   - [x] JWT 인증 미들웨어 구현 (`src/middleware/auth.ts`)
-- [ ] **페이지 관리 API (Page Management API):**
-  - [ ] `GET /api/pages` - 페이지 목록 조회
-  - [ ] `GET /api/pages/{pageName}` - 페이지 상세 조회
-  - [ ] `POST /api/pages` - 새 페이지 생성
-  - [ ] `PUT /api/pages/{pageName}` - 페이지 수정
-  - [ ] `DELETE /api/pages/{pageName}` - 페이지 삭제
-- [ ] **Git 관리 API (Git Management API):**
-  - [ ] `simple-git` 라이브러리 설치 및 설정
-  - [ ] `GET /api/git/status` - 변경 상태 확인
-  - [ ] `POST /api/git/commit` - 커밋 생성
-- [ ] **검색 API (Search API):**
-  - [ ] `GET /api/search?q={query}` - 내용 검색
+- [x] **페이지 관리 API (Page Management API):**
+  - [x] `GET /api/pages` - 페이지 목록 조회
+  - [x] `GET /api/pages/{pageName}` - 페이지 상세 조회
+  - [x] `POST /api/pages` - 새 페이지 생성
+  - [x] `PUT /api/pages/{pageName}` - 페이지 수정
+  - [x] `DELETE /api/pages/{pageName}` - 페이지 삭제
+- [x] **Git 관리 API (Git Management API):**
+  - [x] `simple-git` 라이브러리 설치 및 설정
+  - [x] `GET /api/git/status` - 변경 상태 확인
+  - [x] `POST /api/git/commit` - 커밋 생성
+- [x] **검색 API (Search API):**
+  - [x] `GET /api/search?q={query}` - 내용 검색
 
 ---
 
 ### ⏳ Phase 2: 프론트엔드 개발
 
-- [ ] **기본 레이아웃 구성:** 사이드바, 헤더, 메인 콘텐츠 영역
-- [ ] **라우팅 설정:** `react-router-dom`을 이용한 페이지 간 이동
-- [ ] **인증 흐름 구현:**
-  - [ ] 로그인 페이지 UI
-  - [ ] 로그인 API 연동 및 JWT 저장/관리
-  - [ ] 로그아웃 기능
+- [x] **기본 레이아웃 구성:** 사이드바, 헤더, 메인 콘텐츠 영역
+- [x] **라우팅 설정:** `react-router-dom`을 이용한 페이지 간 이동
+- [x] **인증 흐름 구현:**
+  - [x] 로그인 페이지 UI
+  - [x] 로그인 API 연동 및 JWT 저장/관리
+  - [x] 로그아웃 기능
 - [ ] **페이지 기능 구현:**
   - [ ] 페이지 목록 조회 및 사이드바에 표시
   - [ ] 마크다운 뷰어(Renderer)를 이용한 페이지 조회
