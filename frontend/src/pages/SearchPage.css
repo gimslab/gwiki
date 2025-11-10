@@ -1,0 +1,21 @@
+.search-page {
+  padding: 1rem;
+}
+
+.search-page ul {
+  list-style: none;
+  padding: 0;
+}
+
+.search-page li {
+  margin-bottom: 0.5rem;
+}
+
+.search-page a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.search-page a:hover {
+  text-decoration: underline;
+}

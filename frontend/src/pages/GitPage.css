@@ -1,0 +1,48 @@
+.git-page {
+  padding: 1rem;
+}
+
+.status-section, .commit-section {
+  margin-bottom: 2rem;
+}
+
+.status-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.status-section li {
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  margin-bottom: 0.5rem;
+}
+
+.commit-section form {
+  display: flex;
+  flex-direction: column;
+}
+
+.commit-section textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+  font-family: inherit;
+}
+
+.commit-section button {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 3px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  align-self: flex-start;
+}
+
+.commit-section button:hover {
+  background-color: #0056b3;
+}

@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
+const getErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+};
+
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +37,7 @@ const LoginPage: React.FC = () => {
       localStorage.setItem('gwiki-token', token);
       navigate('/');
     } catch (err) {
-      setError(err.message);
+      setError(getErrorMessage(err));
     }
   };
 

@@ -1,0 +1,24 @@
+.page-viewer .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.edit-page-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 3px;
+  background-color: #ffc107;
+  color: #212529;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.edit-page-button:hover {
+  background-color: #e0a800;
+}
+
+.page-content {
+  line-height: 1.6;
+}
