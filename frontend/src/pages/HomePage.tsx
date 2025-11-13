@@ -1,10 +1,22 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
+  const isAuthenticated = !!localStorage.getItem('gwiki-token');
+
   return (
-    <div>
+    <div style={{ textAlign: 'center', marginTop: '4rem' }}>
       <h2>Welcome to gwiki</h2>
-      <p>Select a page to view or create a new one.</p>
+      {isAuthenticated ? (
+        <p>Select a page from the sidebar to get started.</p>
+      ) : (
+        <>
+          <p>Please log in to manage your wiki pages.</p>
+          <Link to="/login" className="login-button-home">
+            Go to Login
+          </Link>
+        </>
+      )}
     </div>
   );
 };

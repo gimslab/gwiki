@@ -107,3 +107,23 @@ This project includes the following documentation files in the `docs/` directory
 *   `tasks.md`: Outlines the development plan and tracks the progress of the project through different phases.
 *   `prd.md`: The Product Requirements Document, which defines the features and goals of the gwiki application.
 *   `system-design.md`: Describes the technical architecture, data models, and API endpoints for the gwiki system.
+
+## Utility Scripts
+
+### `backend/generate-hash.js`
+
+A script to securely generate a `bcrypt` hash for the admin password.
+
+**Usage:**
+
+1.  Navigate to the `backend` directory:
+    ```bash
+    cd backend
+    ```
+2.  Run the script:
+    ```bash
+    node generate-hash.js
+    ```
+3.  Enter the new password at the prompt. The script will output the generated hash.
+4.  Copy the hash and update the `ADMIN_PASSWORD_HASH` value in your `.env` file.
+
