@@ -1,5 +1,12 @@
 .search-page {
-  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.search-page h2 {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .search-page ul {
@@ -8,14 +15,16 @@
 }
 
 .search-page li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .search-page a {
-  text-decoration: none;
-  color: #007bff;
+  font-size: 1.2rem;
+  font-weight: 500;
 }
 
-.search-page a:hover {
-  text-decoration: underline;
+.search-page p {
+  margin: 0.25rem 0 0 0;
+  color: var(--secondary-color);
 }
+

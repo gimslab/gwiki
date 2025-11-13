@@ -2,23 +2,53 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.page-viewer .page-header h2 {
+  margin: 0;
+}
+
+.page-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-page-button, .delete-page-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
 }
 
 .edit-page-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 3px;
-  background-color: #ffc107;
-  color: #212529;
-  text-decoration: none;
-  font-size: 1rem;
+  background-color: var(--secondary-color);
 }
 
 .edit-page-button:hover {
-  background-color: #e0a800;
+  background-color: #5c636a; /* Darken secondary */
+}
+
+.delete-page-button {
+  background-color: var(--danger-color);
+}
+
+.delete-page-button:hover {
+  background-color: #c82333; /* Darken danger */
 }
 
 .page-content {
-  line-height: 1.6;
+  line-height: 1.7;
+  max-width: 800px;
+  margin: 0 auto;
 }
+
+.page-content h1, .page-content h2, .page-content h3 {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.3em;
+}
+

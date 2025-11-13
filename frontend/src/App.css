@@ -11,16 +11,15 @@
     'header header'
     'sidebar main';
   grid-template-columns: 240px 1fr;
-  grid-template-rows: 60px 1fr;
+  grid-template-rows: auto 1fr;
   height: 100vh;
   width: 100vw;
-  margin: -2rem;
 }
 
 .header {
   grid-area: header;
-  background-color: #f0f0f0;
-  border-bottom: 1px solid #ddd;
+  background-color: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
   padding: 1rem;
   display: flex;
   justify-content: space-between;
@@ -30,38 +29,51 @@
 
 .header h1 {
   margin: 0;
+  font-size: 1.5rem;
+}
+
+.header h1 a {
+  color: var(--text-color);
+  text-decoration: none;
 }
 
 .search-form {
   flex-grow: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .search-form input {
   width: 100%;
   max-width: 400px;
   padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  font-size: 1rem;
 }
 
 .logout-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 3px;
-  background-color: #dc3545;
+  background-color: var(--danger-color);
   color: white;
-  cursor: pointer;
+  border: none;
 }
 
 .logout-button:hover {
-  background-color: #c82333;
+  background-color: #c82333; /* Darken danger color */
 }
 
 .sidebar {
   grid-area: sidebar;
-  background-color: #fafafa;
-  border-right: 1px solid #ddd;
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
   padding: 1rem;
+}
+
+.sidebar h2 {
+  font-size: 1.2rem;
+  margin-top: 0;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
 }
 
 .sidebar ul {
@@ -75,54 +87,49 @@
 }
 
 .sidebar a {
-  text-decoration: none;
-  color: #007bff;
+  display: block;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  color: var(--text-color);
 }
 
-.sidebar a:hover {
-  text-decoration: underline;
+.sidebar a:hover, .sidebar a.active {
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+}
+
+.new-page-button, .git-page-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1rem;
 }
 
 .new-page-button {
-  display: block;
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: none;
-  border-radius: 3px;
-  background-color: #007bff;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  font-size: 1rem;
+  background-color: var(--primary-color);
 }
 
 .new-page-button:hover {
-  background-color: #0056b3;
+  background-color: #0b5ed7; /* Darken primary color */
 }
 
 .git-page-button {
-  display: block;
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 1rem;
-  border: none;
-  border-radius: 3px;
-  background-color: #6c757d;
-  color: white;
-  text-align: center;
-  text-decoration: none;
-  font-size: 1rem;
+  background-color: var(--secondary-color);
 }
 
 .git-page-button:hover {
-  background-color: #5a6268;
+  background-color: #5c636a; /* Darken secondary color */
 }
-
-
-
 
 .main {
   grid-area: main;
-  padding: 1rem;
+  padding: 2rem;
+  overflow-y: auto;
 }
