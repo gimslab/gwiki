@@ -24,7 +24,7 @@
 
 - [x] **인증 시스템 (Authentication System):**
   - [x] 환경변수 설정 (`dotenv`, `src/config.ts`)
-  - [x] `POST /api/auth/login` 엔드포인트 구현
+  - [x] `POST /api/auth/login` 엔드포인트 구현 및 테스트 완료
   - [x] JWT 인증 미들웨어 구현 (`src/middleware/auth.ts`)
 - [x] **페이지 관리 API (Page Management API):**
   - [x] `GET /api/pages` - 페이지 목록 조회
@@ -56,9 +56,16 @@
 - [x] **Git 관리 페이지 구현:**
   - [x] `git status` 결과 표시
   - [x] 커밋 메시지 입력 및 커밋 요청
-- [x] **검색 기능 구현:**
+- [x] 검색 기능 구현:
   - [x] 검색창 UI
   - [x] 검색 API 연동 및 결과 표시
+- [x] 구현 기능 종합 테스트:
+  - [x] 페이지 관리 기능 (생성) 테스트
+  - [x] 페이지 관리 기능 (조회) 테스트
+  - [x] 페이지 관리 기능 (수정) 테스트
+  - [x] 페이지 관리 기능 (삭제) 테스트
+  - [x] Git 관리 기능 (상태 확인, 커밋) 테스트
+  - [x] 검색 기능 테스트
 
 ---
 

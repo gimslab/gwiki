@@ -62,6 +62,33 @@ const PageViewer: React.FC = () => {
     return { __html: rawMarkup };
   };
 
+  const handleDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete "${pageName}"?`)) {
+      try {
+        const token = localStorage.getItem('gwiki-token');
+        const response = await fetch(`/api/pages/${pageName}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          navigate('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to delete page');
+        }
+
+        navigate('/'); // Navigate to home page after successful deletion
+      } catch (err) {
+        setError(getErrorMessage(err));
+      }
+    }
+  };
+
   return (
     <div className="page-viewer">
       {error ? (
@@ -70,9 +97,14 @@ const PageViewer: React.FC = () => {
         <>
           <div className="page-header">
             <h2>{pageName}</h2>
-            <Link to={`/edit/${pageName}`} className="edit-page-button">
-              Edit Page
-            </Link>
+            <div className="page-actions">
+              <Link to={`/edit/${pageName}`} className="edit-page-button">
+                Edit Page
+              </Link>
+              <button onClick={handleDelete} className="delete-page-button">
+                Delete Page
+              </button>
+            </div>
           </div>
           <div className="page-content" dangerouslySetInnerHTML={getMarkdownText()} />
         </>

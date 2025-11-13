@@ -18,3 +18,8 @@ yarn-error.log*
 /backend/node_modules
 /backend/dist
 /backend/.env
+
+# Data and logs
+/gwiki-data
+backend_dev.log
+frontend_dev.log

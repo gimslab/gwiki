@@ -26,7 +26,7 @@ router.get('/:pageName', async (req: Request, res: Response) => {
     const content = await fs.readFile(filePath, 'utf-8');
     res.send(content);
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       res.status(404).json({ message: 'Page not found' });
     } else {
       console.error(`Error reading page ${pageName}:`, error);
@@ -48,7 +48,7 @@ router.post('/', async (req: Request, res: Response) => {
     await fs.writeFile(filePath, content, { flag: 'wx' });
     res.status(201).json({ message: 'Page created successfully' });
   } catch (error) {
-    if (error.code === 'EEXIST') {
+    if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
       res.status(409).json({ message: 'Page already exists' });
     } else {
       console.error(`Error creating page ${pageName}:`, error);
@@ -74,7 +74,7 @@ router.put('/:pageName', async (req: Request, res: Response) => {
     await fs.writeFile(filePath, content);
     res.json({ message: 'Page updated successfully' });
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       res.status(404).json({ message: 'Page not found' });
     } else {
       console.error(`Error updating page ${pageName}:`, error);
@@ -91,7 +91,7 @@ router.delete('/:pageName', async (req: Request, res: Response) => {
     await fs.unlink(filePath);
     res.json({ message: 'Page deleted successfully' });
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       res.status(404).json({ message: 'Page not found' });
     } else {
       console.error(`Error deleting page ${pageName}:`, error);
