@@ -10,7 +10,11 @@ const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-const PageViewer: React.FC = () => {
+interface PageViewerProps {
+  onPageUpdate: () => void;
+}
+
+const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
   const { pageName } = useParams<{ pageName: string }>();
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +86,7 @@ const PageViewer: React.FC = () => {
           throw new Error('Failed to delete page');
         }
 
+        onPageUpdate(); // Refresh the page list
         navigate('/'); // Navigate to home page after successful deletion
       } catch (err) {
         setError(getErrorMessage(err));

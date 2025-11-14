@@ -28,29 +28,30 @@ function App() {
     };
   }, []);
 
+  const fetchPages = async () => {
+    try {
+      const token = localStorage.getItem('gwiki-token');
+      const response = await fetch('/api/pages', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401 || response.status === 403) {
+        handleLogout();
+        return;
+      }
+      if (!response.ok) {
+        throw new Error('Failed to fetch pages');
+      }
+      const data = await response.json();
+      setPages(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
-      const fetchPages = async () => {
-        try {
-          const token = localStorage.getItem('gwiki-token');
-          const response = await fetch('/api/pages', {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (response.status === 401 || response.status === 403) {
-            handleLogout();
-            return;
-          }
-          if (!response.ok) {
-            throw new Error('Failed to fetch pages');
-          }
-          const data = await response.json();
-          setPages(data);
-        } catch (error) {
-          console.error(error);
-        }
-      };
       fetchPages();
     }
   }, [isAuthenticated]);
@@ -107,10 +108,10 @@ function App() {
       <main className="main">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/pages/:pageName" element={<PageViewer />} />
+          <Route path="/pages/:pageName" element={<PageViewer onPageUpdate={fetchPages} />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/new-page" element={<PageEditor />} />
-          <Route path="/edit/:pageName" element={<PageEditor />} />
+          <Route path="/new-page" element={<PageEditor onPageUpdate={fetchPages} />} />
+          <Route path="/edit/:pageName" element={<PageEditor onPageUpdate={fetchPages} />} />
           <Route path="/git" element={<GitPage />} />
           <Route path="/search" element={<SearchPage />} />
         </Routes>

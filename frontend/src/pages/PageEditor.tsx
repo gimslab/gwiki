@@ -9,7 +9,11 @@ const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-const PageEditor: React.FC = () => {
+interface PageEditorProps {
+  onPageUpdate: () => void;
+}
+
+const PageEditor: React.FC<PageEditorProps> = ({ onPageUpdate }) => {
   const { pageName } = useParams<{ pageName?: string }>();
   const navigate = useNavigate();
   const [title, setTitle] = useState(pageName || '');
@@ -56,6 +60,7 @@ const PageEditor: React.FC = () => {
         const data = await response.json();
         throw new Error(data.message || 'Failed to save page');
       }
+      onPageUpdate(); // Refresh the page list
       navigate(`/pages/${title}`);
     } catch (err) {
       setError(getErrorMessage(err));
