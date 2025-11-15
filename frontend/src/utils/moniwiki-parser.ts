@@ -105,32 +105,41 @@ export const parseMoniwiki = (text: string): string => {
     let processedLine = line;
 
     // Moniwiki specific link: --> [PageName]
-    processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '--> <span><a href="/pages/$1.moniwiki">$1</a></span>');
+    processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, (_, p1) => {
+      const encodedPageName = encodeURIComponent(p1);
+      return `--> <span><a href="/pages/${encodedPageName}.moniwiki">${p1}</a></span>`;
+    });
 
     // Moniwiki single bracket link: [http://abc.com xxx yyy]
     processedLine = processedLine.replace(/\[(https?:\/\/[^\]\s]+)\s([^\]]+)\]/g, '<a href="$1">$2</a>');
 
     // Old-style internal link: [PageName]
-    processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, '<a href="/pages/$1.moniwiki">$1</a>');
+    processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, (_, p1) => {
+      const encodedPageName = encodeURIComponent(p1);
+      return `<a href="/pages/${encodedPageName}.moniwiki">${p1}</a>`;
+    });
 
     // Links
     processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '<a href="$1">$2</a>');
     // Moniwiki Macros (case-insensitive)
     processedLine = processedLine.replace(/\[\[([a-zA-Z0-9_]+)\]\]/gi, '{{$1}}');
     // Generic internal link (should be after macros to avoid conflicts)
-    processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, '<a href="/pages/$1">$1</a>');
-
-    // Bold, Italic, Strikethrough
-    processedLine = processedLine.replace(/'''(.*?)'''/g, '<strong>$1</strong>');
-    processedLine = processedLine.replace(/''(.*?)''/g, '<em>$1</em>');
-    processedLine = processedLine.replace(/--(.*?)--/g, '<del>$1</del>');
+    processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, (_, p1) => {
+      const encodedPageName = encodeURIComponent(p1);
+      return `<a href="/pages/${encodedPageName}">${p1}</a>`;
+    });
 
     html += processedLine + '<br>\n';
   }
 
   closeLists();
 
+  // Apply inline formatting after all other parsing to avoid conflicts with link structures
+  html = html.replace(/'''(.*?)'''/g, '<strong>$1</strong>');
+  html = html.replace(/''(.*?)''/g, '<em>$1</em>');
 
+  // Apply strikethrough only to text that is not inside an HTML tag.
+  html = html.replace(/--(([^<>]|<>)*)--/g, '<del>$1</del>');
 
   // The list logic is still very basic. A full implementation would require a proper parser.
   // For now, we will replace the simple list logic with a slightly better one that just wraps lines.
