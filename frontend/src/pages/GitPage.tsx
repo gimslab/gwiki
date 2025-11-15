@@ -73,6 +73,8 @@ const GitPage: React.FC<GitPageProps> = ({ onCommit }) => {
     }
   };
 
+  const hasChanges = status ? status.files.length > 0 : false;
+
   return (
     <div className="git-page">
       <h2>Git Status</h2>
@@ -80,11 +82,15 @@ const GitPage: React.FC<GitPageProps> = ({ onCommit }) => {
       {status && (
         <div className="status-section">
           <h3>Changed Files</h3>
-          <ul>
-            {status.files.map((file) => (
-              <li key={file.path}>{file.path} ({file.working_dir})</li>
-            ))}
-          </ul>
+          {status.files.length > 0 ? (
+            <ul>
+              {status.files.map((file) => (
+                <li key={file.path}>{file.path} ({file.working_dir})</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No changes to commit.</p>
+          )}
         </div>
       )}
       <div className="commit-section">
@@ -96,8 +102,9 @@ const GitPage: React.FC<GitPageProps> = ({ onCommit }) => {
             placeholder="Enter commit message"
             rows={5}
             required
+            disabled={!hasChanges}
           />
-          <button type="submit">Commit</button>
+          <button type="submit" disabled={!hasChanges}>Commit</button>
         </form>
       </div>
     </div>

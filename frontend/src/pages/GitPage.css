@@ -58,3 +58,8 @@
   background-color: #0b5ed7; /* Darken primary */
 }
 
+.commit-section button:disabled {
+  background-color: #cccccc; /* Lighter grey for disabled state */
+  cursor: not-allowed;
+}
+
