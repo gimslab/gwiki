@@ -211,15 +211,15 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
     let processedLine = line;
 
     // Moniwiki specific link: --> [PageName] (This is a Moniwiki specific rendering, not a direct markdown equivalent, so we'll convert it to a standard internal link)
-    processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '[[PageName]]'); // This will be handled by the next regex
+    processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '[[$1]]'); // This will be handled by the next regex
 
     // Old-style internal link: [PageName]
     processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, '[[$1]]'); // Convert to MediaWiki style internal link, which can be further processed if needed
 
     // Links: [[https://example.com|Example]] -> [Example](https://example.com)
     processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '[$2]($1)');
-    // Links: [[PageName]] -> [PageName](/pages/PageName) (assuming internal pages are at /pages/PageName)
-    processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, '[$1](/pages/$1)');
+    // Links: [[PageName]] -> [PageName](/pages/PageName.moniwiki) (assuming internal pages are at /pages/PageName.moniwiki)
+    processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, '[$1](/pages/$1.moniwiki)');
 
 
     // Bold, Italic, Strikethrough
