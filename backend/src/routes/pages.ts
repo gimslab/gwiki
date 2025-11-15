@@ -108,4 +108,37 @@ router.delete('/:pageName', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/convert-moniwiki', async (req: Request, res: Response) => {
+  const { originalFileName, newFileName, markdownContent } = req.body;
+
+  if (!originalFileName || !newFileName || markdownContent === undefined) {
+    return res.status(400).json({ message: 'originalFileName, newFileName, and markdownContent are required' });
+  }
+
+  const newFilePath = path.join(config.dataDirectoryPath, newFileName);
+
+  try {
+    // Check if the new file already exists to prevent overwriting
+    await fs.access(newFilePath)
+      .then(() => {
+        // If access succeeds, file exists
+        return res.status(409).json({ message: `Markdown file '${newFileName}' already exists.` });
+      })
+      .catch(async (error) => {
+        // If access fails with ENOENT, file does not exist, so proceed to write
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+          await fs.writeFile(newFilePath, markdownContent);
+          res.status(201).json({ message: `Page '${originalFileName}' converted to Markdown successfully as '${newFileName}'` });
+        } else {
+          // Other errors during access check
+          console.error(`Error checking existence of new file ${newFileName}:`, error);
+          res.status(500).json({ message: 'Error during file conversion process' });
+        }
+      });
+  } catch (error) {
+    console.error(`Error converting Moniwiki file ${originalFileName} to Markdown:`, error);
+    res.status(500).json({ message: 'Error converting Moniwiki file to Markdown' });
+  }
+});
+
 export default router;

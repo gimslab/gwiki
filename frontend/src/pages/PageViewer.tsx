@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { marked } from 'marked';
 import './PageViewer.css';
 
-import { parseMoniwiki } from '../utils/moniwiki-parser';
+import { parseMoniwiki, convertMoniwikiToMarkdown } from '../utils/moniwiki-parser';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -21,6 +21,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
   const pageName = pageFileName ? pageFileName.split('.').slice(0, -1).join('.') : '';
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [conversionStatus, setConversionStatus] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -56,6 +57,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
         const data = await response.text();
         setContent(data);
         setError(null);
+        setConversionStatus(null); // Clear conversion status on new page load
       } catch (err) {
         setError(getErrorMessage(err));
       }
@@ -109,6 +111,52 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
     }
   };
 
+  const handleConvertToMarkdown = async () => {
+    if (!pageFileName?.endsWith('.moniwiki')) {
+      setConversionStatus('This is not a Moniwiki file.');
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to convert "${pageFileName}" to Markdown? A new file "${pageName}.md" will be created.`)) {
+      setConversionStatus('Converting...');
+      try {
+        const token = localStorage.getItem('gwiki-token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const markdownContent = convertMoniwikiToMarkdown(content);
+        const newFileName = `${pageName}.md`;
+
+        const response = await fetch(`/api/pages/convert-moniwiki`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ originalFileName: pageFileName, newFileName, markdownContent }),
+        });
+
+        if (response.status === 401 || response.status === 403) {
+          navigate('/login');
+          return;
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to convert Moniwiki to Markdown');
+        }
+
+        setConversionStatus(`Successfully converted to ${newFileName}`);
+        onPageUpdate(); // Refresh the page list to show the new file
+        navigate(`/pages/${newFileName}`); // Navigate to the new markdown page
+      } catch (err) {
+        setConversionStatus(`Error: ${getErrorMessage(err)}`);
+      }
+    }
+  };
+
   return (
     <div className="page-viewer">
       {error ? (
@@ -118,6 +166,11 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
           <div className="page-header">
             <h2>{pageName}</h2>
             <div className="page-actions">
+              {pageFileName?.endsWith('.moniwiki') && (
+                <button onClick={handleConvertToMarkdown} className="convert-button">
+                  Convert to Markdown
+                </button>
+              )}
               <Link to={`/edit/${pageFileName}`} className="edit-page-button">
                 Edit Page
               </Link>
@@ -126,6 +179,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
               </button>
             </div>
           </div>
+          {conversionStatus && <div className="conversion-status">{conversionStatus}</div>}
           <div className="page-content" dangerouslySetInnerHTML={getRenderedContent()} />
         </>
       )}

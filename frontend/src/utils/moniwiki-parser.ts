@@ -107,11 +107,17 @@ export const parseMoniwiki = (text: string): string => {
     // Moniwiki specific link: --> [PageName]
     processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '--> <span><a href="/pages/$1.moniwiki">$1</a></span>');
 
+    // Moniwiki single bracket link: [http://abc.com xxx yyy]
+    processedLine = processedLine.replace(/\[(https?:\/\/[^\]\s]+)\s([^\]]+)\]/g, '<a href="$1">$2</a>');
+
     // Old-style internal link: [PageName]
     processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, '<a href="/pages/$1.moniwiki">$1</a>');
 
     // Links
     processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '<a href="$1">$2</a>');
+    // Moniwiki Macros (case-insensitive)
+    processedLine = processedLine.replace(/\[\[([a-zA-Z0-9_]+)\]\]/gi, '{{$1}}');
+    // Generic internal link (should be after macros to avoid conflicts)
     processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, '<a href="/pages/$1">$1</a>');
 
     // Bold, Italic, Strikethrough
@@ -124,29 +130,7 @@ export const parseMoniwiki = (text: string): string => {
 
   closeLists();
 
-  // This is a simplified parser. For real nested lists, a more complex tree-based approach is needed.
-  // The current list implementation just wraps li elements in one ul/ol.
-  // Let's refine the list logic slightly to handle simple nesting.
-  const fixListNesting = (h: string) => {
-      const lines = h.split('\n');
-      let result = '';
-      let listStack: string[] = [];
 
-      for (const line of lines) {
-          if (line.startsWith('<ul>') || line.startsWith('<ol>')) {
-              listStack.push(line.startsWith('<ul>') ? 'ul' : 'ol');
-              result += line + '\n';
-          } else if (line.startsWith('  <li>')) {
-              const currentList = listStack[listStack.length - 1];
-              if (currentList) {
-                  result = result.trimEnd().slice(0, -6) + `\n<${currentList}>\n${line}\n</${currentList}>\n</li>\n`;
-              }
-          } else {
-              result += line + '\n';
-          }
-      }
-      return result;
-  };
 
   // The list logic is still very basic. A full implementation would require a proper parser.
   // For now, we will replace the simple list logic with a slightly better one that just wraps lines.
@@ -154,4 +138,88 @@ export const parseMoniwiki = (text: string): string => {
   const finalHtml = html.replace(/<\/li>\n\s*<li>/g, '</li>\n<li>'); // Basic cleanup
 
   return finalHtml;
+};
+
+export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
+  if (!moniwikiText) {
+    return '';
+  }
+
+  const lines = moniwikiText.split('\n');
+  let markdown = '';
+  let inCodeBlock = false;
+
+  for (const line of lines) {
+    // Code blocks
+    if (line.startsWith('{{{')) {
+      markdown += '```\n';
+      inCodeBlock = true;
+      continue;
+    }
+    if (line.startsWith('}}}')) {
+      markdown += '```\n';
+      inCodeBlock = false;
+      continue;
+    }
+    if (inCodeBlock) {
+      markdown += line + '\n';
+      continue;
+    }
+
+    // Headings
+    if (line.match(/^={1,5}\s.*\s={1,5}$/)) {
+      const level = line.match(/^(=+)/)![1].length;
+      const content = line.replace(/^=+\s/, '').replace(/\s=+$/, '');
+      markdown += '#'.repeat(level) + ` ${content}\n`;
+      continue;
+    }
+
+    // Horizontal rule
+    if (line.match(/^----/)) {
+      markdown += '---\n';
+      continue;
+    }
+    
+    // Blockquote
+    if (line.startsWith('> ')) {
+      markdown += `> ${line.substring(2)}\n`;
+      continue;
+    }
+
+    // Unordered list
+    if (line.match(/^\s*\*/)) {
+      markdown += line.replace(/^\s*\*\s?/, '* ') + '\n';
+      continue;
+    }
+
+    // Ordered list
+    if (line.match(/^\s*([0-9]+\.|[a-zA-Z]\.)/)) {
+      markdown += line.replace(/^\s*([0-9]+\.|[a-zA-Z]\.)\s?/, '$1 ') + '\n';
+      continue;
+    }
+
+    // Inline formatting
+    let processedLine = line;
+
+    // Moniwiki specific link: --> [PageName] (This is a Moniwiki specific rendering, not a direct markdown equivalent, so we'll convert it to a standard internal link)
+    processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '[[PageName]]'); // This will be handled by the next regex
+
+    // Old-style internal link: [PageName]
+    processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, '[[$1]]'); // Convert to MediaWiki style internal link, which can be further processed if needed
+
+    // Links: [[https://example.com|Example]] -> [Example](https://example.com)
+    processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '[$2]($1)');
+    // Links: [[PageName]] -> [PageName](/pages/PageName) (assuming internal pages are at /pages/PageName)
+    processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, '[$1](/pages/$1)');
+
+
+    // Bold, Italic, Strikethrough
+    processedLine = processedLine.replace(/'''(.*?)'''/g, '**$1**');
+    processedLine = processedLine.replace(/''(.*?)''/g, '*$1*');
+    processedLine = processedLine.replace(/--(.*?)--/g, '~~$1~~');
+
+    markdown += processedLine + '\n';
+  }
+
+  return markdown;
 };
