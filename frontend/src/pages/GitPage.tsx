@@ -19,7 +19,11 @@ const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-const GitPage: React.FC = () => {
+interface GitPageProps {
+  onCommit: () => void;
+}
+
+const GitPage: React.FC<GitPageProps> = ({ onCommit }) => {
   const [status, setStatus] = useState<GitStatus | null>(null);
   const [commitMessage, setCommitMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +66,8 @@ const GitPage: React.FC = () => {
         throw new Error(data.message || 'Failed to commit');
       }
       setCommitMessage('');
-      fetchStatus(); // Refresh status after commit
+      fetchStatus(); // Refresh status on the page
+      onCommit(); // Refresh status in the header
     } catch (err) {
       setError(getErrorMessage(err));
     }

@@ -15,6 +15,18 @@ router.get('/status', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/status-summary', async (req: Request, res: Response) => {
+  try {
+    const status = await git.status();
+    const changedFilesCount = status.files.length;
+    const hasChanges = changedFilesCount > 0;
+    res.json({ hasChanges, changedFilesCount });
+  } catch (error) {
+    console.error('Error getting git status summary:', error);
+    res.status(500).json({ message: 'Error getting git status summary' });
+  }
+});
+
 router.post('/commit', async (req: Request, res: Response) => {
   const { message } = req.body;
 

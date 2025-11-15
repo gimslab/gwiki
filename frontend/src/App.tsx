@@ -7,12 +7,42 @@ import LoginPage from './pages/LoginPage';
 import PageEditor from './pages/PageEditor';
 import GitPage from './pages/GitPage';
 import SearchPage from './pages/SearchPage';
+import GitStatusIndicator from './components/GitStatusIndicator';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('gwiki-token'));
   const [pages, setPages] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [changedFilesCount, setChangedFilesCount] = useState(0);
   const navigate = useNavigate();
+
+  const fetchGitStatus = async () => {
+    try {
+      const token = localStorage.getItem('gwiki-token');
+      if (!token) return;
+
+      const response = await fetch('/api/git/status-summary', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setChangedFilesCount(data.changedFilesCount);
+      }
+    } catch (error) {
+      console.error('Error fetching git status summary:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchGitStatus();
+      const interval = setInterval(fetchGitStatus, 30000); // Poll every 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -62,6 +92,11 @@ function App() {
     navigate('/login');
   };
 
+  const handlePageUpdate = () => {
+    fetchPages();
+    fetchGitStatus();
+  };
+
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     if (searchQuery.trim()) {
@@ -83,9 +118,12 @@ function App() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
-            <button onClick={handleLogout} className="logout-button">
-              Logout
-            </button>
+            <div className="header-right-items">
+              <GitStatusIndicator changedFilesCount={changedFilesCount} />
+              <button onClick={handleLogout} className="logout-button">
+                Logout
+              </button>
+            </div>
           </>
         )}
       </header>
@@ -108,11 +146,11 @@ function App() {
       <main className="main">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/pages/:pageName" element={<PageViewer onPageUpdate={fetchPages} />} />
+          <Route path="/pages/:pageName" element={<PageViewer onPageUpdate={handlePageUpdate} />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/new-page" element={<PageEditor onPageUpdate={fetchPages} />} />
-          <Route path="/edit/:pageName" element={<PageEditor onPageUpdate={fetchPages} />} />
-          <Route path="/git" element={<GitPage />} />
+          <Route path="/new-page" element={<PageEditor onPageUpdate={handlePageUpdate} />} />
+          <Route path="/edit/:pageName" element={<PageEditor onPageUpdate={handlePageUpdate} />} />
+          <Route path="/git" element={<GitPage onCommit={fetchGitStatus} />} />
           <Route path="/search" element={<SearchPage />} />
         </Routes>
       </main>

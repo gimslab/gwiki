@@ -1,0 +1,29 @@
+.git-status-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.status-dot.green {
+  background-color: #28a745;
+  box-shadow: 0 0 5px #28a745;
+}
+
+.status-dot.yellow {
+  background-color: #ffc107;
+  box-shadow: 0 0 5px #ffc107;
+}
+
+.change-count {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--text-color);
+}

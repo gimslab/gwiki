@@ -39,6 +39,12 @@
   justify-content: center;
 }
 
+.header-right-items {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .search-form input {
   width: 100%;
   max-width: 400px;
