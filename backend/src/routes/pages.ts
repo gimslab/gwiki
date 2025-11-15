@@ -8,9 +8,17 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     const files = await fs.readdir(config.dataDirectoryPath);
-    const pages = files
-      .filter((file) => file.endsWith('.md') || file.endsWith('.moniwiki'));
-    res.json(pages);
+    const pageFiles = files.filter((file) => file.endsWith('.md') || file.endsWith('.moniwiki'));
+
+    const pagesWithStats = await Promise.all(pageFiles.map(async (file) => {
+      const filePath = path.join(config.dataDirectoryPath, file);
+      const stats = await fs.stat(filePath);
+      return { name: file, mtimeMs: stats.mtimeMs };
+    }));
+
+    pagesWithStats.sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+    res.json(pagesWithStats.map(page => page.name));
   } catch (error) {
     console.error('Error reading data directory:', error);
     res.status(500).json({ message: 'Error reading wiki pages' });
