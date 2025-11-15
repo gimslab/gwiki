@@ -131,8 +131,10 @@ function App() {
         <h2>Pages</h2>
         {isAuthenticated && (
           <>
-            <Link to="/new-page" className="new-page-button">New Page</Link>
-            <Link to="/git" className="git-page-button">Git Status</Link>
+            <div className="sidebar-actions">
+              <Link to="/new-page" className="new-page-button">New Page</Link>
+              <Link to="/git" className="git-page-button">Git Status</Link>
+            </div>
             <ul>
               {pages.map((page) => (
                 <li key={page}>

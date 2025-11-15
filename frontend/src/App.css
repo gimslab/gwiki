@@ -101,11 +101,17 @@
   text-decoration: none;
 }
 
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .new-page-button, .git-page-button {
   display: block;
   width: 100%;
   padding: 0.75rem;
-  margin-bottom: 1rem;
   border: none;
   border-radius: 0.25rem;
   color: white;
