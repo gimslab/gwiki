@@ -25,14 +25,14 @@ export const parseMoniwiki = (text: string): string => {
   for (const line of lines) {
     // Code blocks
     if (line.startsWith('{{{')) {
-      if (inCodeBlock) {
-        html += '</pre></code>\n';
-        inCodeBlock = false;
-      } else {
-        closeLists();
-        html += '<pre><code>';
-        inCodeBlock = true;
-      }
+      closeLists();
+      html += '<pre><code>';
+      inCodeBlock = true;
+      continue;
+    }
+    if (line.startsWith('}}}')) {
+      html += '</code></pre>\n';
+      inCodeBlock = false;
       continue;
     }
     if (inCodeBlock) {
@@ -106,6 +106,9 @@ export const parseMoniwiki = (text: string): string => {
 
     // Moniwiki specific link: --> [PageName]
     processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '--> <span><a href="/pages/$1.moniwiki">$1</a></span>');
+
+    // Old-style internal link: [PageName]
+    processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, '<a href="/pages/$1.moniwiki">$1</a>');
 
     // Links
     processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '<a href="$1">$2</a>');
