@@ -15,7 +15,8 @@ interface PageViewerProps {
 }
 
 const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
-  const { pageName } = useParams<{ pageName: string }>();
+  const { pageFileName } = useParams<{ pageFileName: string }>();
+  const pageName = pageFileName ? pageFileName.split('.').slice(0, -1).join('.') : '';
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
           return;
         }
 
-        const response = await fetch(`/api/pages/${pageName}`, {
+        const response = await fetch(`/api/pages/${pageFileName}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -59,7 +60,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
     };
 
     fetchPage();
-  }, [pageName, navigate]);
+  }, [pageFileName, navigate]);
 
   const getMarkdownText = () => {
     const rawMarkup = marked(content);
@@ -70,7 +71,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
     if (window.confirm(`Are you sure you want to delete "${pageName}"?`)) {
       try {
         const token = localStorage.getItem('gwiki-token');
-        const response = await fetch(`/api/pages/${pageName}`, {
+        const response = await fetch(`/api/pages/${pageFileName}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -103,7 +104,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
           <div className="page-header">
             <h2>{pageName}</h2>
             <div className="page-actions">
-              <Link to={`/edit/${pageName}`} className="edit-page-button">
+              <Link to={`/edit/${pageFileName}`} className="edit-page-button">
                 Edit Page
               </Link>
               <button onClick={handleDelete} className="delete-page-button">

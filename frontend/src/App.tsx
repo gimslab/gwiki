@@ -138,7 +138,7 @@ function App() {
             <ul>
               {pages.map((page) => (
                 <li key={page}>
-                  <Link to={`/pages/${page}`}>{page}</Link>
+                  <Link to={`/pages/${encodeURIComponent(page)}`}>{page}</Link>
                 </li>
               ))}
             </ul>
@@ -148,7 +148,7 @@ function App() {
       <main className="main">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/pages/:pageName" element={<PageViewer onPageUpdate={handlePageUpdate} />} />
+          <Route path="/pages/:pageFileName" element={<PageViewer onPageUpdate={handlePageUpdate} />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/new-page" element={<PageEditor onPageUpdate={handlePageUpdate} />} />
           <Route path="/edit/:pageName" element={<PageEditor onPageUpdate={handlePageUpdate} />} />

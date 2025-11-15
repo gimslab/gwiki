@@ -9,8 +9,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const files = await fs.readdir(config.dataDirectoryPath);
     const pages = files
-      .filter((file) => file.endsWith('.md'))
-      .map((file) => file.replace(/\.md$/, ''));
+      .filter((file) => file.endsWith('.md') || file.endsWith('.moniwiki'));
     res.json(pages);
   } catch (error) {
     console.error('Error reading data directory:', error);
@@ -19,8 +18,9 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 router.get('/:pageName', async (req: Request, res: Response) => {
-  const { pageName } = req.params;
-  const filePath = path.join(config.dataDirectoryPath, `${pageName}.md`);
+  const { pageName: encodedPageName } = req.params;
+  const pageName = decodeURIComponent(encodedPageName);
+  const filePath = path.join(config.dataDirectoryPath, pageName);
 
   try {
     const content = await fs.readFile(filePath, 'utf-8');
