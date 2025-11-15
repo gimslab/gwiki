@@ -65,7 +65,7 @@ router.put('/:pageName', async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'content is required' });
   }
 
-  const filePath = path.join(config.dataDirectoryPath, `${pageName}.md`);
+  const filePath = path.join(config.dataDirectoryPath, pageName);
 
   try {
     // Check if file exists
@@ -85,7 +85,7 @@ router.put('/:pageName', async (req: Request, res: Response) => {
 
 router.delete('/:pageName', async (req: Request, res: Response) => {
   const { pageName } = req.params;
-  const filePath = path.join(config.dataDirectoryPath, `${pageName}.md`);
+  const filePath = path.join(config.dataDirectoryPath, pageName);
 
   try {
     await fs.unlink(filePath);

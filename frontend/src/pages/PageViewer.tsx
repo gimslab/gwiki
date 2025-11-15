@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { marked } from 'marked';
 import './PageViewer.css';
 
+import { parseMoniwiki } from '../utils/moniwiki-parser';
+
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;
@@ -62,8 +64,20 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
     fetchPage();
   }, [pageFileName, navigate]);
 
-  const getMarkdownText = () => {
-    const rawMarkup = marked(content);
+  const getRenderedContent = () => {
+    console.log('Rendering content for:', pageFileName);
+    console.log('Raw content:', content);
+
+    let rawMarkup;
+    if (pageFileName?.endsWith('.moniwiki')) {
+      console.log('Using Moniwiki parser.');
+      rawMarkup = parseMoniwiki(content);
+    } else {
+      console.log('Using Markdown parser.');
+      rawMarkup = marked(content);
+    }
+    
+    console.log('Generated markup:', rawMarkup);
     return { __html: rawMarkup };
   };
 
@@ -112,7 +126,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
               </button>
             </div>
           </div>
-          <div className="page-content" dangerouslySetInnerHTML={getMarkdownText()} />
+          <div className="page-content" dangerouslySetInnerHTML={getRenderedContent()} />
         </>
       )}
     </div>
