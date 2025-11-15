@@ -222,13 +222,13 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
     processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, '[$1](/pages/$1.moniwiki)');
 
 
-    // Bold, Italic, Strikethrough
-    processedLine = processedLine.replace(/'''(.*?)'''/g, '**$1**');
-    processedLine = processedLine.replace(/''(.*?)''/g, '*$1*');
-    processedLine = processedLine.replace(/--(.*?)--/g, '~~$1~~');
-
     markdown += processedLine + '\n';
   }
+
+  // Apply inline formatting after all other parsing to avoid conflicts with link structures
+  markdown = markdown.replace(/'''(.*?)'''/g, '**$1**');
+  markdown = markdown.replace(/''(.*?)''/g, '*$1*');
+  markdown = markdown.replace(/--((?:(?!\[|\]).)*?)--/g, '~~$1~~'); // Use a more robust regex for strikethrough
 
   return markdown;
 };
