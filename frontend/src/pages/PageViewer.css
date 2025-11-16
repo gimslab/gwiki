@@ -11,6 +11,21 @@
   margin: 0;
 }
 
+.markdown-link {
+  margin-top: 0.5rem; /* Add some space below the title */
+}
+
+.markdown-version-link {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #ff7f00; /* Use a prominent orange color */
+  text-decoration: none;
+}
+
+.markdown-version-link:hover {
+  text-decoration: underline;
+}
+
 .page-actions {
   display: flex;
   gap: 0.5rem;

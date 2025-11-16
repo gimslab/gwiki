@@ -14,15 +14,19 @@ const getErrorMessage = (error: unknown): string => {
 
 interface PageViewerProps {
   onPageUpdate: () => void;
+  pages: string[];
 }
 
-const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
+const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   const { pageFileName } = useParams<{ pageFileName: string }>();
   const pageName = pageFileName ? pageFileName.split('.').slice(0, -1).join('.') : '';
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [conversionStatus, setConversionStatus] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const correspondingMdFile = `${pageName}.md`;
+  const mdFileExists = pages.includes(correspondingMdFile);
 
   useEffect(() => {
     const fetchPage = async () => {
@@ -165,6 +169,11 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
         <>
           <div className="page-header">
             <h2>{pageName}</h2>
+            {mdFileExists && pageFileName?.endsWith('.moniwiki') && (
+              <div className="markdown-link">
+                <Link to={`/pages/${correspondingMdFile}`} className="markdown-version-link">View Markdown Version</Link>
+              </div>
+            )}
             <div className="page-actions">
               {pageFileName?.endsWith('.moniwiki') && (
                 <button onClick={handleConvertToMarkdown} className="convert-button">
