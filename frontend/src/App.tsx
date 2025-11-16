@@ -138,7 +138,12 @@ function App() {
             <ul>
               {pages.map((page) => (
                 <li key={page}>
-                  <Link to={`/pages/${encodeURIComponent(page)}`}>{page}</Link>
+                  <Link
+                    to={`/pages/${encodeURIComponent(page)}`}
+                    className={page.endsWith('.moniwiki') ? 'moniwiki-file-link' : ''}
+                  >
+                    {page}
+                  </Link>
                 </li>
               ))}
             </ul>

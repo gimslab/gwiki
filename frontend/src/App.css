@@ -101,6 +101,10 @@
   text-decoration: none;
 }
 
+.sidebar a.moniwiki-file-link {
+  color: #FF4500 !important; /* Brighter, more colorblind-friendly red for Moniwiki files */
+}
+
 .sidebar-actions {
   display: flex;
   flex-direction: column;
