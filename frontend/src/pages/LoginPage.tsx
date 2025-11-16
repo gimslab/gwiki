@@ -9,7 +9,11 @@ const getErrorMessage = (error: unknown): string => {
   return String(error);
 };
 
-const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  onLogin: () => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +39,7 @@ const LoginPage: React.FC = () => {
 
       const { token } = await response.json();
       localStorage.setItem('gwiki-token', token);
+      onLogin();
       navigate('/');
     } catch (err) {
       setError(getErrorMessage(err));
