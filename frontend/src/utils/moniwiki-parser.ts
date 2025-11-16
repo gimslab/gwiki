@@ -131,8 +131,12 @@ export const parseMoniwiki = (text: string): string => {
     processedLine = processedLine.replace(/\[\[([a-zA-Z0-9_]+)\]\]/gi, '{{$1}}');
     // Generic internal link (should be after macros to avoid conflicts)
     processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, (_, p1) => {
-      const encodedPageName = encodeURIComponent(p1);
-      return `<a href="/pages/${encodedPageName}">${p1}</a>`;
+      let pageName = p1;
+      if (pageName.startsWith('"') && pageName.endsWith('"')) {
+        pageName = pageName.substring(1, pageName.length - 1);
+      }
+      const encodedPageName = encodeURIComponent(pageName);
+      return `<a href="/pages/${encodedPageName}">${pageName}</a>`;
     });
 
     // Autolink URLs
@@ -232,7 +236,7 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
     processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '[[$1]]'); // This will be handled by the next regex
 
     // Quoted internal link: ["PageName"]
-    processedLine = processedLine.replace(/\["([^"]+)"\]/g, '[[$1]]');
+    processedLine = processedLine.replace(/(?<!\[)\["([^"]+)"\](?!\])/g, '[[$1]]');
 
     // Old-style internal link: [PageName]
     processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\s*\()/g, '[[$1]]'); // Convert to MediaWiki style internal link, which can be further processed if needed
@@ -240,7 +244,13 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
     // Links: [[https://example.com|Example]] -> [Example](https://example.com)
     processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '[$2]($1)');
     // Links: [[PageName]] -> [PageName](/pages/PageName.moniwiki) (assuming internal pages are at /pages/PageName.moniwiki)
-    processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, '[$1](/pages/$1.moniwiki)');
+    processedLine = processedLine.replace(/\[\[([^\]]+)\]\]/g, (_, p1) => {
+      let pageName = p1;
+      if (pageName.startsWith('"') && pageName.endsWith('"')) {
+        pageName = pageName.substring(1, pageName.length - 1);
+      }
+      return `[${pageName}](/pages/${pageName}.moniwiki)`;
+    });
 
 
     markdown += processedLine + '\n';
