@@ -77,13 +77,25 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
     console.log('Rendering content for:', pageFileName);
     console.log('Raw content:', content);
 
+    const renderer = new marked.Renderer();
+    renderer.link = ({ href, title, text }) => {
+      if (href && href.endsWith('.moniwiki')) {
+        const titleAttr = title ? ` title="${title}"` : '';
+        return `<a href="${href}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+      }
+      
+      // Fallback for default link rendering
+      const titleAttr = title ? ` title="${title}"` : '';
+      return `<a href="${href}"${titleAttr}>${text}</a>`;
+    };
+
     let rawMarkup;
     if (pageFileName?.endsWith('.moniwiki')) {
       console.log('Using Moniwiki parser.');
       rawMarkup = parseMoniwiki(content);
     } else {
       console.log('Using Markdown parser.');
-      rawMarkup = marked(content);
+      rawMarkup = marked(content, { renderer });
     }
     
     console.log('Generated markup:', rawMarkup);

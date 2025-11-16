@@ -116,3 +116,18 @@
   padding-bottom: 0.3em;
 }
 
+.moniwiki-link {
+  /* color: orange !important; */
+}
+
+.moniwiki-inline-tag {
+  background-color: #FFF3E0;
+  color: #FF8C00; /* Changed text color to dark orange */
+  font-size: 0.7em;
+  padding: 2px 4px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  /* Invert font for the tag */
+  font-weight: bold;
+  font-style: normal;
+}
