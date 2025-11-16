@@ -113,6 +113,12 @@ export const parseMoniwiki = (text: string): string => {
     // Moniwiki single bracket link: [http://abc.com xxx yyy]
     processedLine = processedLine.replace(/\[(https?:\/\/[^\]\s]+)\s([^\]]+)\]/g, '<a href="$1">$2</a>');
 
+    // Quoted internal link: ["PageName"]
+    processedLine = processedLine.replace(/\["([^"]+)"\]/g, (_, p1) => {
+      const encodedPageName = encodeURIComponent(p1);
+      return `<a href="/pages/${encodedPageName}.moniwiki">${p1}</a>`;
+    });
+
     // Old-style internal link: [PageName]
     processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, (_, p1) => {
       const encodedPageName = encodeURIComponent(p1);
@@ -224,6 +230,9 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
 
     // Moniwiki specific link: --> [PageName] (This is a Moniwiki specific rendering, not a direct markdown equivalent, so we'll convert it to a standard internal link)
     processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '[[$1]]'); // This will be handled by the next regex
+
+    // Quoted internal link: ["PageName"]
+    processedLine = processedLine.replace(/\["([^"]+)"\]/g, '[[$1]]');
 
     // Old-style internal link: [PageName]
     processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\s*\()/g, '[[$1]]'); // Convert to MediaWiki style internal link, which can be further processed if needed
