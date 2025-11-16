@@ -28,6 +28,9 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   const correspondingMdFile = `${pageName}.md`;
   const mdFileExists = pages.includes(correspondingMdFile);
 
+  const correspondingMoniwikiFile = `${pageName}.moniwiki`;
+  const moniwikiFileExists = pages.includes(correspondingMoniwikiFile);
+
   useEffect(() => {
     const fetchPage = async () => {
       try {
@@ -168,10 +171,20 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
       ) : (
         <>
           <div className="page-header">
-            <h2>{pageName}</h2>
-            {mdFileExists && pageFileName?.endsWith('.moniwiki') && (
-              <div className="markdown-link">
-                <Link to={`/pages/${correspondingMdFile}`} className="markdown-version-link">View Markdown Version</Link>
+            <div className="title-group">
+              {pageFileName?.endsWith('.moniwiki') && (
+                <span className="moniwiki-tag">MONIWIKI</span>
+              )}
+              <h2>{pageName}</h2>
+              {mdFileExists && pageFileName?.endsWith('.moniwiki') && (
+                <div className="markdown-link">
+                  <Link to={`/pages/${correspondingMdFile}`} className="markdown-version-link">DO NOT UPDATE THIS. USE MARKDOWN FILE</Link>
+                </div>
+              )}
+            </div>
+            {moniwikiFileExists && pageFileName?.endsWith('.md') && (
+              <div className="old-file-link">
+                <Link to={`/pages/${correspondingMoniwikiFile}`} className="old-version-link">moniwiki file exists</Link>
               </div>
             )}
             <div className="page-actions">
