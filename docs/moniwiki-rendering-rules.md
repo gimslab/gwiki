@@ -64,6 +64,7 @@
 
 *   **내부 페이지 링크 old:** `[페이지 이름]` -> `<a href="/pages/페이지 이름">페이지 이름</a>`
 *   **내부 페이지 링크 new:** `[[페이지 이름]]` -> `<a href="/pages/페이지 이름">페이지 이름</a>`
+*   **따옴표로 둘러싸인 내부 페이지 링크:** `["페이지 이름"]` -> `<a href="/pages/페이지 이름.moniwiki">페이지 이름</a>`
 *   **외부 링크:** `[[http://example.com|예제 사이트]]` -> `<a href="http://example.com">예제 사이트</a>`
 *   **자동 링크 변환:** `https://google.com` -> `<a href="https://google.com">https://google.com</a>`
 
