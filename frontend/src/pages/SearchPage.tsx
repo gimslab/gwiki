@@ -10,6 +10,7 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 const SearchPage: React.FC = () => {
+
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q');
   const [results, setResults] = useState<string[]>([]);
