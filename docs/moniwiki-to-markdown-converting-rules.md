@@ -37,7 +37,8 @@
 ## 4. 링크
 
 *   **내부 페이지 링크:** `[페이지 이름]` 또는 `[[페이지 이름]]` -> `[페이지 이름](/pages/페이지 이름.moniwiki)`
-*   **외부 링크:** `[[http://example.com|예제 사이트]]` -> `[예제 사이트](http://example.com)`
+*   **외부 링크 (텍스트 포함):** `[http://example.com 예제 사이트]` -> `[예제 사이트](http://example.com)`
+*   **외부 링크 (파이프 포함):** `[[http://example.com|예제 사이트]]` -> `[예제 사이트](http://example.com)`
 
 ## 5. 기타
 
