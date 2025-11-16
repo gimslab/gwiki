@@ -189,6 +189,12 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
       continue;
     }
     
+    // Metadata
+    if (line.startsWith('#')) {
+      markdown += '```\n' + line + '\n```\n';
+      continue;
+    }
+
     // Blockquote
     if (line.startsWith('> ')) {
       markdown += `> ${line.substring(2)}\n`;
@@ -210,11 +216,14 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
     // Inline formatting
     let processedLine = line;
 
+    // Moniwiki single bracket link: [http://abc.com xxx yyy]
+    processedLine = processedLine.replace(/\[(https?:\/\/[^\]\s]+)\s([^\]]+)\]/g, '[$2]($1)');
+
     // Moniwiki specific link: --> [PageName] (This is a Moniwiki specific rendering, not a direct markdown equivalent, so we'll convert it to a standard internal link)
     processedLine = processedLine.replace(/-->\s*\[([^\]]+)\]/g, '[[$1]]'); // This will be handled by the next regex
 
     // Old-style internal link: [PageName]
-    processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, '[[$1]]'); // Convert to MediaWiki style internal link, which can be further processed if needed
+    processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\s*\()/g, '[[$1]]'); // Convert to MediaWiki style internal link, which can be further processed if needed
 
     // Links: [[https://example.com|Example]] -> [Example](https://example.com)
     processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '[$2]($1)');
