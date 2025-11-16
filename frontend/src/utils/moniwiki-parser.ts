@@ -129,6 +129,9 @@ export const parseMoniwiki = (text: string): string => {
       return `<a href="/pages/${encodedPageName}">${p1}</a>`;
     });
 
+    // Autolink URLs
+    processedLine = processedLine.replace(/(?<!href=")(https?:\/\/[^\s<]+)/g, '<a href="$1">$1</a>');
+
     html += processedLine + '<br>\n';
   }
 
