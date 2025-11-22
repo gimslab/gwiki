@@ -250,144 +250,59 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
     const getRenderedContent = () => {
 
+      const renderer = new marked.Renderer();
+      const originalLinkRenderer = renderer.link.bind(renderer);
 
+      renderer.link = (props) => {
+        const { href, title, text } = props;
+        if (!href) {
+          return originalLinkRenderer(props);
+        }
+        try {
+          let pageFileName: string | null = null;
+          if (href.startsWith('/pages/')) {
+            pageFileName = decodeURIComponent(href.substring('/pages/'.length));
+          }
+          else if (!/^(https?:|ftp:|mailto:|\/)/.test(href)) {
+            pageFileName = decodeURIComponent(href);
+          }
 
-      console.log('Rendering content for:', pageFileName);
-
-
-
-      console.log('All Pages list length:', allPages.length);
-
-
-
-      console.log('Raw content:', content);
-
-
-
-  
-
-
-
-          const renderer = new marked.Renderer();
-
-
-
-  
-
-
-
-          const originalLinkRenderer = renderer.link.bind(renderer);
-
-
-
-  
-
-
-
-      
-
-
-
-  
-
-
-
-          renderer.link = (props) => {
-            const { href, title, text } = props;
-            if (!href) {
-              return originalLinkRenderer(props);
+          if (pageFileName) {
+            const pageExists = allPages.includes(pageFileName);
+            if (pageExists) {
+              if (pageFileName.endsWith('.moniwiki')) {
+                const titleAttr = title ? ` title="${title}"` : '';
+                return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+              }
+              return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
+            } else { 
+              if (pageFileName.endsWith('.moniwiki')) {
+                return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+              } else {
+                return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text}</a>`;
+              }
             }
-            try {
-              let pageFileName: string | null = null;
-              // Case 1: Absolute internal link (e.g., /pages/some-page.md)
-              if (href.startsWith('/pages/')) {
-                pageFileName = decodeURIComponent(href.substring('/pages/'.length));
-              }
-              // Case 2: Relative internal link (e.g., other-page.md or folder/other-page.md)
-              else if (!/^(https?:|ftp:|mailto:|\/)/.test(href)) {
-                pageFileName = decodeURIComponent(href);
-              }
-
-              // If it's an internal link (either absolute or relative)
-              if (pageFileName) {
-                const pageExists = allPages.includes(pageFileName);
-                if (pageExists) {
-                  // If it's a moniwiki file, add the tag.
-                  if (pageFileName.endsWith('.moniwiki')) {
-                    const titleAttr = title ? ` title="${title}"` : '';
-                    return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
-                  }
-                  // Otherwise, a standard blue link.
-                  return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
-                } else { // Page does NOT exist
-                  // Check if the target is a .moniwiki file
-                  if (pageFileName.endsWith('.moniwiki')) {
-                    // Render red link WITH the tag
-                    return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
-                  } else {
-                    // Render a standard red link for .md files
-                    return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text}</a>`;
-                  }
-                }
-              }
-            } catch (e) {
-              console.error('URIError during link processing:', e);
-            }
-
-            // Fallback for all other link types (external, other absolute paths, etc.)
-            return originalLinkRenderer(props);
-          };
-
-
-
-  
-
-
+          }
+        } catch (e) {
+          console.error('URIError during link processing:', e);
+        }
+        return originalLinkRenderer(props);
+      };
 
       let rawMarkup;
 
-
-
       if (pageFileName?.endsWith('.moniwiki')) {
-
-
-
-        console.log('Using Moniwiki parser.');
-
-
-
         rawMarkup = parseMoniwiki(content, allPages);
-
-
-
       } else {
-
-
-
-        console.log('Using Markdown parser.');
-
-
-
-        rawMarkup = marked(content, { renderer });
-
-
-
+        // Pre-process markdown to encode link URLs
+        const processedContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+          const encodedUrl = url.split('/').map(encodeURIComponent).join('/');
+          return `[${text}](${encodedUrl})`;
+        });
+        rawMarkup = marked(processedContent, { renderer });
       }
 
-
-
-      
-
-
-
-      console.log('Generated markup:', rawMarkup);
-
-
-
       return { __html: rawMarkup };
-
-
-
     };
 
 
