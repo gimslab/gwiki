@@ -25,13 +25,28 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   const [notFoundFilenameMatches, setNotFoundFilenameMatches] = useState<string[]>([]);
   const [notFoundContentMatches, setNotFoundContentMatches] = useState<string[]>([]);
   const [conversionStatus, setConversionStatus] = useState<string | null>(null);
+  const [correspondingFile, setCorrespondingFile] = useState<{ exists: boolean; fileName: string } | null>(null);
   const navigate = useNavigate();
 
-  const correspondingMdFile = `${pageName}.md`;
-  const mdFileExists = pages.some(p => p.normalize() === correspondingMdFile.normalize());
-
-  const correspondingMoniwikiFile = `${pageName}.moniwiki`;
-  const moniwikiFileExists = pages.some(p => p.normalize() === correspondingMoniwikiFile.normalize());
+  useEffect(() => {
+    const checkCorrespondingFile = async () => {
+      if (pageFileName) {
+        try {
+          const token = localStorage.getItem('gwiki-token');
+          const response = await fetch(`/api/pages/exists/${pageFileName}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setCorrespondingFile(data);
+          }
+        } catch (err) {
+          console.error('Failed to check for corresponding file:', err);
+        }
+      }
+    };
+    checkCorrespondingFile();
+  }, [pageFileName]);
 
   useEffect(() => {
     const fetchSearchResults = async (searchTerm: string) => {
@@ -243,14 +258,14 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
                 <span className="moniwiki-tag">MONIWIKI</span>
               )}
               <h2>{pageName}</h2>
-              {mdFileExists && pageFileName?.endsWith('.moniwiki') && (
+              {correspondingFile?.exists && (
                 <div className="markdown-link">
-                  <Link to={`/pages/${correspondingMdFile}`} className="markdown-version-link">MARKDOWN EXISTS</Link>
-                </div>
-              )}
-              {moniwikiFileExists && pageFileName?.endsWith('.md') && (
-                <div className="moniwiki-link">
-                  <Link to={`/pages/${correspondingMoniwikiFile}`} className="moniwiki-version-link">moniwiki file exists</Link>
+                  <Link
+                    to={`/pages/${correspondingFile.fileName}`}
+                    className={pageFileName?.endsWith('.moniwiki') ? "markdown-version-link" : "moniwiki-version-link"}
+                  >
+                    {pageFileName?.endsWith('.moniwiki') ? 'MARKDOWN EXISTS' : 'MONIWIKI EXISTS'}
+                  </Link>
                 </div>
               )}
             </div>

@@ -37,7 +37,7 @@
 .markdown-version-link {
   font-weight: bold;
   text-transform: uppercase;
-  color: #ff7f00; /* Use a prominent orange color */
+  color: #007bff; /* Blue color for the markdown link */
   text-decoration: none;
 }
 
@@ -48,7 +48,7 @@
 .moniwiki-version-link {
   font-weight: bold;
   text-transform: uppercase;
-  color: #007bff; /* Blue color for the moniwiki link */
+  color: #ff7f00; /* Use a prominent orange color */
   text-decoration: none;
 }
 
