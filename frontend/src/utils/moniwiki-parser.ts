@@ -257,7 +257,8 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
       if (pageName.startsWith('"') && pageName.endsWith('"')) {
         pageName = pageName.substring(1, pageName.length - 1);
       }
-      return `[${pageName}](${pageName}.moniwiki)`;
+      const fileName = pageName.replace(/\s/g, ''); // Remove spaces for the filename
+      return `[${pageName}](${fileName}.md)`;
     });
 
 
