@@ -4,6 +4,7 @@ import { marked } from 'marked';
 import './PageViewer.css';
 
 import { parseMoniwiki, convertMoniwikiToMarkdown } from '../utils/moniwiki-parser';
+import ContentRenderer from '../components/ContentRenderer';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -248,64 +249,75 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-    const getRenderedContent = () => {
+  const getRenderedContent = () => {
+    // For moniwiki files, use the specific parser and return
+    if (pageFileName?.endsWith('.moniwiki')) {
+      return { __html: parseMoniwiki(content, allPages) };
+    }
 
-      const renderer = new marked.Renderer();
-      const originalLinkRenderer = renderer.link.bind(renderer);
+    // For Markdown files, use marked with a custom renderer
+    const renderer = new marked.Renderer();
+    const originalLinkRenderer = renderer.link.bind(renderer);
 
-      renderer.link = (props) => {
-        const { href, title, text } = props;
-        if (!href) {
-          return originalLinkRenderer(props);
-        }
+    renderer.link = (props) => {
+      let { href, title, text } = props;
+
+      if (!href) {
+        return originalLinkRenderer(props);
+      }
+      href = href.trim(); // Trim whitespace from href
+
+      // 1. Check for external links
+      if (/^(https?:|ftp:|mailto:)/.test(href)) {
+        const titleAttr = title ? ` title="${title}"` : '';
+        return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+      }
+
+      // 2. Check for internal wiki links (relative paths that are not fragments)
+      if (!href.startsWith('/') && !href.startsWith('#')) {
         try {
-          let pageFileName: string | null = null;
-          if (href.startsWith('/pages/')) {
-            pageFileName = decodeURIComponent(href.substring('/pages/'.length));
-          }
-          else if (!/^(https?:|ftp:|mailto:|\/)/.test(href)) {
-            pageFileName = decodeURIComponent(href);
-          }
-
-          if (pageFileName) {
-            const pageExists = allPages.includes(pageFileName);
-            if (pageExists) {
-              if (pageFileName.endsWith('.moniwiki')) {
-                const titleAttr = title ? ` title="${title}"` : '';
-                return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
-              }
-              return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
-            } else {
-              const pageNameForSearch = pageFileName.split('.').slice(0, -1).join('.');
-              const searchUrl = `/search?q=${encodeURIComponent(pageNameForSearch)}`;
-              if (pageFileName.endsWith('.moniwiki')) {
-                return `<a href="${searchUrl}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
-              } else {
-                return `<a href="${searchUrl}" class="red-link">${text}</a>`;
-              }
+          const pageFileName = decodeURIComponent(href);
+          const pageExists = allPages.includes(pageFileName);
+          if (pageExists) {
+            // moniwiki extension is a special case for styling
+            if (pageFileName.endsWith('.moniwiki')) {
+              const titleAttr = title ? ` title="${title}"` : '';
+              return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
             }
+            return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
+          } else {
+            // create a red link to search page
+            const pageNameForSearch = pageFileName.split('.').slice(0, -1).join('.') || pageFileName;
+            const searchUrl = `/search?q=${encodeURIComponent(pageNameForSearch)}`;
+            if (pageFileName.endsWith('.moniwiki')) {
+              return `<a href="${searchUrl}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+            }
+            return `<a href="${searchUrl}" class="red-link">${text}</a>`;
           }
         } catch (e) {
           console.error('URIError during link processing:', e);
+          // fall through to original renderer
         }
-        return originalLinkRenderer(props);
-      };
-
-      let rawMarkup;
-
-      if (pageFileName?.endsWith('.moniwiki')) {
-        rawMarkup = parseMoniwiki(content, allPages);
-      } else {
-        // Pre-process markdown to encode link URLs
-        const processedContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-          const encodedUrl = url.split('/').map(encodeURIComponent).join('/');
-          return `[${text}](${encodedUrl})`;
-        });
-        rawMarkup = marked(processedContent, { renderer });
       }
 
-      return { __html: rawMarkup };
+      // 3. Fallback for other links (like absolute paths /... or fragments #...)
+      return originalLinkRenderer(props);
     };
+
+    // Pre-process markdown to encode internal link URLs before passing to marked
+    const processedContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+      // only encode if it's NOT an external link
+      const trimmedUrl = url.trim();
+      if (!/^(https?:|ftp:|mailto:)/.test(trimmedUrl)) {
+        const encodedUrl = trimmedUrl.split('/').map(segment => encodeURIComponent(segment)).join('/');
+        return `[${text}](${encodedUrl})`;
+      }
+      return `[${text}](${trimmedUrl})`; // Return with trimmed url
+    });
+
+    const rawMarkup = marked(processedContent, { renderer });
+    return { __html: rawMarkup };
+  };
 
 
 
@@ -595,7 +607,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
           {conversionStatus && <div className="conversion-status">{conversionStatus}</div>}
 
-          <div className="page-content" dangerouslySetInnerHTML={getRenderedContent()} />
+          <ContentRenderer className="page-content" html={getRenderedContent().__html} />
 
         </>
 
