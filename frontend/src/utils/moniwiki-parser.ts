@@ -160,7 +160,7 @@ export const parseMoniwiki = (text: string, pages: string[]): string => {
   html = html.replace(/''(.*?)''/g, '<em>$1</em>');
 
   // Apply strikethrough only to text that is not inside an HTML tag.
-  html = html.replace(/--(([^<>]|<>)*)--/g, '<del>$1</del>');
+  html = html.replace(/--([^-]*)--/g, '<del>$1</del>');
 
   // The list logic is still very basic. A full implementation would require a proper parser.
   // For now, we will replace the simple list logic with a slightly better one that just wraps lines.
