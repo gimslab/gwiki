@@ -22,6 +22,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   const pageName = pageFileName ? pageFileName.split('.').slice(0, -1).join('.') : '';
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [notFoundSearchResults, setNotFoundSearchResults] = useState<string[]>([]);
   const [conversionStatus, setConversionStatus] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -32,6 +33,22 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   const moniwikiFileExists = pages.includes(correspondingMoniwikiFile);
 
   useEffect(() => {
+    const fetchSearchResults = async (searchTerm: string) => {
+      try {
+        const token = localStorage.getItem('gwiki-token');
+        const response = await fetch(`/api/search?q=${searchTerm}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setNotFoundSearchResults(data);
+        }
+      } catch (err) {
+        // Don't update the main error state, just log it
+        console.error('Search failed:', err);
+      }
+    };
+
     const fetchPage = async () => {
       try {
         const token = localStorage.getItem('gwiki-token');
@@ -54,6 +71,9 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
         if (response.status === 404) {
           setError('Page not found');
           setContent('');
+          if (pageName) {
+            fetchSearchResults(pageName);
+          }
           return;
         }
 
@@ -64,6 +84,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
         const data = await response.text();
         setContent(data);
         setError(null);
+        setNotFoundSearchResults([]); // Clear search results on successful page load
         setConversionStatus(null); // Clear conversion status on new page load
       } catch (err) {
         setError(getErrorMessage(err));
@@ -71,7 +92,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
     };
 
     fetchPage();
-  }, [pageFileName, navigate]);
+  }, [pageFileName, navigate, pageName]);
 
   const getRenderedContent = () => {
     console.log('Rendering content for:', pageFileName);
@@ -179,7 +200,21 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   return (
     <div className="page-viewer">
       {error ? (
-        <h2>{error}</h2>
+        <div>
+          <h2>{error}</h2>
+          {notFoundSearchResults.length > 0 && (
+            <div className="not-found-search">
+              <h3>Search results for "{pageName}":</h3>
+              <ul>
+                {notFoundSearchResults.map((page) => (
+                  <li key={page}>
+                    <Link to={`/pages/${page}`}>{page}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       ) : (
         <>
           <div className="page-header">
