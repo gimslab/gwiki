@@ -96,8 +96,13 @@
 }
 
 .delete-page-button:hover {
-  background-color: #c82333; /* Darken danger */
+  background-color: #bb2d3b;
 }
+
+.page-content .red-link {
+  color: red;
+}
+
 
 .convert-button {
   background-color: var(--primary-color); /* Assuming a primary color variable exists */

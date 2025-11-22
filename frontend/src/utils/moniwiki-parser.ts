@@ -1,6 +1,6 @@
 // frontend/src/utils/moniwiki-parser.ts
 
-export const parseMoniwiki = (text: string): string => {
+export const parseMoniwiki = (text: string, pages: string[]): string => {
   if (!text) {
     return '';
   }
@@ -135,8 +135,16 @@ export const parseMoniwiki = (text: string): string => {
       if (pageName.startsWith('"') && pageName.endsWith('"')) {
         pageName = pageName.substring(1, pageName.length - 1);
       }
-      const encodedPageName = encodeURIComponent(pageName);
-      return `<a href="/pages/${encodedPageName}">${pageName}</a>`;
+      
+      const pageToLink = pages.find(p => p.startsWith(pageName + '.'));
+
+      if (pageToLink) {
+        // It exists, create a blue link
+        return `<a href="/pages/${encodeURIComponent(pageToLink)}">${pageName}</a>`;
+      } else {
+        // It does not exist, create a red link to the editor
+        return `<a href="/edit/${encodeURIComponent(pageName + '.md')}" class="red-link">${pageName}</a>`;
+      }
     });
 
     // Autolink URLs
