@@ -25,6 +25,20 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/all', async (req: Request, res: Response) => {
+  try {
+    const files = await fs.readdir(config.dataDirectoryPath);
+    const pageFiles = files.filter((file) => file.endsWith('.md') || file.endsWith('.moniwiki'));
+    
+    pageFiles.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+    res.json(pageFiles);
+  } catch (error) {
+    console.error('Error reading data directory:', error);
+    res.status(500).json({ message: 'Error reading wiki pages' });
+  }
+});
+
 router.get('/exists/:pageName', async (req: Request, res: Response) => {
   const { pageName } = req.params;
   const baseName = pageName.split('.').slice(0, -1).join('.');

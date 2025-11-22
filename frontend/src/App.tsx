@@ -8,6 +8,7 @@ import PageEditor from './pages/PageEditor';
 import GitPage from './pages/GitPage';
 import SearchPage from './pages/SearchPage';
 import GitStatusIndicator from './components/GitStatusIndicator';
+import TitleIndexPage from './pages/TitleIndexPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('gwiki-token'));
@@ -134,6 +135,7 @@ function App() {
             <div className="sidebar-actions">
               <Link to="/new-page" className="new-page-button">New Page</Link>
               <Link to="/git" className="git-page-button">Git Status</Link>
+              <Link to="/title-index" className="title-index-button">Title Index</Link>
             </div>
             <ul>
               {pages.map((page) => (
@@ -159,6 +161,7 @@ function App() {
           <Route path="/edit/:pageName" element={<PageEditor onPageUpdate={handlePageUpdate} />} />
           <Route path="/git" element={<GitPage onCommit={fetchGitStatus} />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/title-index" element={<TitleIndexPage />} />
         </Routes>
       </main>
     </div>

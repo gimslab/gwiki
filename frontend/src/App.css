@@ -140,6 +140,23 @@
   background-color: #5c636a; /* Darken secondary color */
 }
 
+.title-index-button {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 0.25rem;
+  background-color: #198754; /* Green */
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.title-index-button:hover {
+  background-color: #157347; /* Darken green */
+}
+
 .main {
 
   grid-area: main;

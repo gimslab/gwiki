@@ -1,0 +1,36 @@
+.title-index-page {
+  padding: 1rem;
+}
+
+.title-index-nav {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.title-index-nav a {
+  margin: 0 0.5rem;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.title-index-group {
+  margin-bottom: 2rem;
+}
+
+.title-index-group h3 {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.title-index-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  -webkit-columns: 3;
+  -moz-columns: 3;
+  columns: 3;
+}
+
+.title-index-group li {
+  margin-bottom: 0.5rem;
+}
