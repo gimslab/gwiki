@@ -111,7 +111,7 @@ export const parseMoniwiki = (text: string, pages: string[]): string => {
     });
 
     // Moniwiki single bracket link: [http://abc.com xxx yyy]
-    processedLine = processedLine.replace(/\[(https?:\/\/[^\]\s]+)\s([^\]]+)\]/g, '<a href="$1">$2</a>');
+    processedLine = processedLine.replace(/\[(https?:\/\/[^\]\s]+)\s([^\]]+)\]/g, '<a href="$1" target="_blank">$2</a>');
 
     // Quoted internal link: ["PageName"]
     processedLine = processedLine.replace(/\["([^"]+)"\]/g, (_, p1) => {
@@ -119,14 +119,8 @@ export const parseMoniwiki = (text: string, pages: string[]): string => {
       return `<a href="/pages/${encodedPageName}.moniwiki">${p1}</a>`;
     });
 
-    // Old-style internal link: [PageName]
-    processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\])/g, (_, p1) => {
-      const encodedPageName = encodeURIComponent(p1);
-      return `<a href="/pages/${encodedPageName}.moniwiki">${p1}</a>`;
-    });
-
     // Links
-    processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '<a href="$1">$2</a>');
+    processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '<a href="$1" target="_blank">$2</a>');
     // Moniwiki Macros (case-insensitive)
     processedLine = processedLine.replace(/\[\[([a-zA-Z0-9_]+)\]\]/gi, '{{$1}}');
     // Generic internal link (should be after macros to avoid conflicts)
@@ -136,6 +130,10 @@ export const parseMoniwiki = (text: string, pages: string[]): string => {
         pageName = pageName.substring(1, pageName.length - 1);
       }
       
+      if (pageName.startsWith('http')) {
+        return `<a href="${pageName}" target="_blank">${pageName}</a>`;
+      }
+
       const pageToLink = pages.find(p => p.startsWith(pageName + '.'));
 
       if (pageToLink) {
@@ -259,6 +257,9 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
       let pageName = p1;
       if (pageName.startsWith('"') && pageName.endsWith('"')) {
         pageName = pageName.substring(1, pageName.length - 1);
+      }
+      if (pageName.startsWith('http')) {
+        return `[${pageName}](${pageName})`;
       }
       const fileName = pageName.replace(/\s/g, ''); // Remove spaces for the filename
       return `[${pageName}](${fileName}.md)`;
