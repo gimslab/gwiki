@@ -249,59 +249,11 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
     const getRenderedContent = () => {
-
-      const renderer = new marked.Renderer();
-      const originalLinkRenderer = renderer.link.bind(renderer);
-
-      renderer.link = (props) => {
-        const { href, title, text } = props;
-        if (!href) {
-          return originalLinkRenderer(props);
-        }
-        try {
-          let pageFileName: string | null = null;
-          if (href.startsWith('/pages/')) {
-            pageFileName = decodeURIComponent(href.substring('/pages/'.length));
-          }
-          else if (!/^(https?:|ftp:|mailto:|\/)/.test(href)) {
-            pageFileName = decodeURIComponent(href);
-          }
-
-          if (pageFileName) {
-            const pageExists = allPages.includes(pageFileName);
-            if (pageExists) {
-              if (pageFileName.endsWith('.moniwiki')) {
-                const titleAttr = title ? ` title="${title}"` : '';
-                return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
-              }
-              return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
-            } else {
-              const pageNameForSearch = pageFileName.split('.').slice(0, -1).join('.');
-              const searchUrl = `/search?q=${encodeURIComponent(pageNameForSearch)}`;
-              if (pageFileName.endsWith('.moniwiki')) {
-                return `<a href="${searchUrl}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
-              } else {
-                return `<a href="${searchUrl}" class="red-link">${text}</a>`;
-              }
-            }
-          }
-        } catch (e) {
-          console.error('URIError during link processing:', e);
-        }
-        return originalLinkRenderer(props);
-      };
-
       let rawMarkup;
-
       if (pageFileName?.endsWith('.moniwiki')) {
         rawMarkup = parseMoniwiki(content, allPages);
       } else {
-        // Pre-process markdown to encode link URLs
-        const processedContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-          const encodedUrl = url.split('/').map(encodeURIComponent).join('/');
-          return `[${text}](${encodedUrl})`;
-        });
-        rawMarkup = marked(processedContent, { renderer });
+        rawMarkup = marked(content);
       }
 
       return { __html: rawMarkup };
