@@ -275,11 +275,13 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
                 return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
               }
               return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
-            } else { 
+            } else {
+              const pageNameForSearch = pageFileName.split('.').slice(0, -1).join('.');
+              const searchUrl = `/search?q=${encodeURIComponent(pageNameForSearch)}`;
               if (pageFileName.endsWith('.moniwiki')) {
-                return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+                return `<a href="${searchUrl}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
               } else {
-                return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text}</a>`;
+                return `<a href="${searchUrl}" class="red-link">${text}</a>`;
               }
             }
           }
