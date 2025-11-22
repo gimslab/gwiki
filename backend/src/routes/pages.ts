@@ -25,6 +25,27 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/exists/:pageName', async (req: Request, res: Response) => {
+  const { pageName } = req.params;
+  const baseName = pageName.split('.').slice(0, -1).join('.');
+  const currentExt = pageName.split('.').pop();
+
+  if (!baseName || !currentExt) {
+    return res.status(400).json({ exists: false, message: 'Invalid page name' });
+  }
+
+  const otherExt = currentExt === 'md' ? 'moniwiki' : 'md';
+  const otherFileName = `${baseName}.${otherExt}`;
+  const filePath = path.join(config.dataDirectoryPath, otherFileName);
+
+  try {
+    await fs.access(filePath);
+    res.json({ exists: true, fileName: otherFileName });
+  } catch (error) {
+    res.json({ exists: false });
+  }
+});
+
 router.get('/:pageName', async (req: Request, res: Response) => {
   const { pageName: encodedPageName } = req.params;
   const pageName = decodeURIComponent(encodedPageName);
