@@ -88,6 +88,12 @@ const PageEditor: React.FC<PageEditorProps> = ({ onPageUpdate }) => {
             id="content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onBlur={(e) => {
+              if (e.target.value !== content) {
+                console.log('Syncing external change to state on blur...');
+                setContent(e.target.value);
+              }
+            }}
             rows={20}
             required
           />
