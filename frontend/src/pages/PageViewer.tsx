@@ -28,10 +28,10 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   const navigate = useNavigate();
 
   const correspondingMdFile = `${pageName}.md`;
-  const mdFileExists = pages.includes(correspondingMdFile);
+  const mdFileExists = pages.some(p => p.normalize() === correspondingMdFile.normalize());
 
   const correspondingMoniwikiFile = `${pageName}.moniwiki`;
-  const moniwikiFileExists = pages.includes(correspondingMoniwikiFile);
+  const moniwikiFileExists = pages.some(p => p.normalize() === correspondingMoniwikiFile.normalize());
 
   useEffect(() => {
     const fetchSearchResults = async (searchTerm: string) => {
@@ -245,15 +245,15 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
               <h2>{pageName}</h2>
               {mdFileExists && pageFileName?.endsWith('.moniwiki') && (
                 <div className="markdown-link">
-                  <Link to={`/pages/${correspondingMdFile}`} className="markdown-version-link">DO NOT UPDATE THIS. USE MARKDOWN FILE</Link>
+                  <Link to={`/pages/${correspondingMdFile}`} className="markdown-version-link">MARKDOWN EXISTS</Link>
+                </div>
+              )}
+              {moniwikiFileExists && pageFileName?.endsWith('.md') && (
+                <div className="moniwiki-link">
+                  <Link to={`/pages/${correspondingMoniwikiFile}`} className="moniwiki-version-link">moniwiki file exists</Link>
                 </div>
               )}
             </div>
-            {moniwikiFileExists && pageFileName?.endsWith('.md') && (
-              <div className="old-file-link">
-                <Link to={`/pages/${correspondingMoniwikiFile}`} className="old-version-link">moniwiki file exists</Link>
-              </div>
-            )}
             <div className="page-actions">
               {pageFileName?.endsWith('.moniwiki') && (
                 <button onClick={handleConvertToMarkdown} className="convert-button">

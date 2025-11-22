@@ -45,6 +45,17 @@
   text-decoration: underline;
 }
 
+.moniwiki-version-link {
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #007bff; /* Blue color for the moniwiki link */
+  text-decoration: none;
+}
+
+.moniwiki-version-link:hover {
+  text-decoration: underline;
+}
+
 .old-version-link {
   font-weight: bold;
   text-transform: uppercase;
