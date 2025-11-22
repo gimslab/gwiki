@@ -492,7 +492,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                if (pageExists) {
+                          if (pageExists) {
 
 
 
@@ -500,7 +500,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                  // If it's a moniwiki file, add the tag.
+                
 
 
 
@@ -508,7 +508,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                  if (pageFileName.endsWith('.moniwiki')) {
+                            // If it's a moniwiki file, add the tag.
 
 
 
@@ -516,7 +516,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                    const titleAttr = title ? ` title="${title}"` : '';
+                
 
 
 
@@ -524,7 +524,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                    return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+                            if (pageFileName.endsWith('.moniwiki')) {
 
 
 
@@ -532,7 +532,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                  }
+                
 
 
 
@@ -540,7 +540,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                  // Otherwise, a standard blue link.
+                              const titleAttr = title ? ` title="${title}"` : '';
 
 
 
@@ -548,7 +548,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                  return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
+                
 
 
 
@@ -556,7 +556,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                } else {
+                              return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
 
 
 
@@ -564,7 +564,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                  // Non-existent pages get a red link.
+                
 
 
 
@@ -572,7 +572,7 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                  return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text}</a>`;
+                            }
 
 
 
@@ -580,7 +580,191 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
 
 
 
-                }
+                
+
+
+
+  
+
+
+
+                            // Otherwise, a standard blue link.
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                            return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                          } else { // Page does NOT exist
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                            // Check if the target is a .moniwiki file
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                            if (pageFileName.endsWith('.moniwiki')) {
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                              // Render red link WITH the tag
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                              return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                            } else {
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                              // Render a standard red link for .md files
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                              return `<a href="/edit/${encodeURIComponent(pageFileName)}" class="red-link">${text}</a>`;
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                            }
+
+
+
+  
+
+
+
+                
+
+
+
+  
+
+
+
+                          }
 
 
 
