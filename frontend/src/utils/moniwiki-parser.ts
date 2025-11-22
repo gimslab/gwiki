@@ -257,7 +257,7 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
       if (pageName.startsWith('"') && pageName.endsWith('"')) {
         pageName = pageName.substring(1, pageName.length - 1);
       }
-      return `[${pageName}](/pages/${pageName}.moniwiki)`;
+      return `[${pageName}](${pageName}.moniwiki)`;
     });
 
 
