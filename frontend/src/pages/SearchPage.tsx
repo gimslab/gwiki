@@ -13,7 +13,8 @@ const SearchPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q');
-  const [results, setResults] = useState<string[]>([]);
+  const [filenameMatches, setFilenameMatches] = useState<string[]>([]);
+  const [contentMatches, setContentMatches] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,7 +27,8 @@ const SearchPage: React.FC = () => {
           });
           if (!response.ok) throw new Error('Search failed');
           const data = await response.json();
-          setResults(data);
+          setFilenameMatches(data.filenameMatches || []);
+          setContentMatches(data.contentMatches || []);
         } catch (err) {
           setError(getErrorMessage(err));
         }
@@ -39,16 +41,36 @@ const SearchPage: React.FC = () => {
     <div className="search-page">
       <h2>Search Results for "{query}"</h2>
       {error && <p className="error-message">{error}</p>}
-      {results.length > 0 ? (
-        <ul>
-          {results.map((page) => (
-            <li key={page}>
-              <Link to={`/pages/${page}`}>{page}</Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
+
+      {filenameMatches.length === 0 && contentMatches.length === 0 ? (
         <p>No results found.</p>
+      ) : (
+        <>
+          {filenameMatches.length > 0 && (
+            <div className="results-section">
+              <h3>Filename Matches</h3>
+              <ul>
+                {filenameMatches.map((page) => (
+                  <li key={page}>
+                    <Link to={`/pages/${page}`}>{page}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {contentMatches.length > 0 && (
+            <div className="results-section">
+              <h3>Content Matches</h3>
+              <ul>
+                {contentMatches.map((page) => (
+                  <li key={page}>
+                    <Link to={`/pages/${page}`}>{page}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

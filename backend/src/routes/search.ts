@@ -16,21 +16,29 @@ router.get('/', async (req: Request, res: Response) => {
     const files = await fs.readdir(config.dataDirectoryPath);
     const targetFiles = files.filter((file) => file.endsWith('.md') || file.endsWith('.moniwiki'));
 
-    const results = [];
+    const filenameMatches: string[] = [];
+    const contentMatches: string[] = [];
+    const queryLower = q.toLowerCase();
+
     for (const file of targetFiles) {
       const filePath = path.join(config.dataDirectoryPath, file);
-      const stats = await fs.stat(filePath); // Get file stats
-      if (!stats.isFile()) { // Skip if it's not a file
+      const stats = await fs.stat(filePath);
+      if (!stats.isFile()) {
         continue;
       }
-      const content = await fs.readFile(filePath, 'utf-8');
-      const fileName = file.toLowerCase();
-      if (fileName.includes(q.toLowerCase()) || content.toLowerCase().includes(q.toLowerCase())) {
-        results.push(file);
+      
+      const fileNameLower = file.toLowerCase();
+      if (fileNameLower.includes(queryLower)) {
+        filenameMatches.push(file);
+      } else {
+        const content = await fs.readFile(filePath, 'utf-8');
+        if (content.toLowerCase().includes(queryLower)) {
+          contentMatches.push(file);
+        }
       }
     }
 
-    res.json(results);
+    res.json({ filenameMatches, contentMatches });
   } catch (error) {
     console.error('Error searching pages:', error);
     if (error instanceof Error) {

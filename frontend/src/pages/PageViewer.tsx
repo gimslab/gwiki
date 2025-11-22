@@ -22,7 +22,8 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
   const pageName = pageFileName ? pageFileName.split('.').slice(0, -1).join('.') : '';
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [notFoundSearchResults, setNotFoundSearchResults] = useState<string[]>([]);
+  const [notFoundFilenameMatches, setNotFoundFilenameMatches] = useState<string[]>([]);
+  const [notFoundContentMatches, setNotFoundContentMatches] = useState<string[]>([]);
   const [conversionStatus, setConversionStatus] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -41,7 +42,8 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          setNotFoundSearchResults(data);
+          setNotFoundFilenameMatches(data.filenameMatches || []);
+          setNotFoundContentMatches(data.contentMatches || []);
         }
       } catch (err) {
         // Don't update the main error state, just log it
@@ -84,7 +86,8 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
         const data = await response.text();
         setContent(data);
         setError(null);
-        setNotFoundSearchResults([]); // Clear search results on successful page load
+        setNotFoundFilenameMatches([]); // Clear filename search results on successful page load
+        setNotFoundContentMatches([]); // Clear content search results on successful page load
         setConversionStatus(null); // Clear conversion status on new page load
       } catch (err) {
         setError(getErrorMessage(err));
@@ -202,16 +205,33 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate, pages }) => {
       {error ? (
         <div>
           <h2>{error}</h2>
-          {notFoundSearchResults.length > 0 && (
+          {(notFoundFilenameMatches.length > 0 || notFoundContentMatches.length > 0) && (
             <div className="not-found-search">
               <h3>Search results for "{pageName}":</h3>
-              <ul>
-                {notFoundSearchResults.map((page) => (
-                  <li key={page}>
-                    <Link to={`/pages/${page}`}>{page}</Link>
-                  </li>
-                ))}
-              </ul>
+              {notFoundFilenameMatches.length > 0 && (
+                <div className="results-section">
+                  <h4>Filename Matches</h4>
+                  <ul>
+                    {notFoundFilenameMatches.map((page) => (
+                      <li key={page}>
+                        <Link to={`/pages/${page}`}>{page}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {notFoundContentMatches.length > 0 && (
+                <div className="results-section">
+                  <h4>Content Matches</h4>
+                  <ul>
+                    {notFoundContentMatches.map((page) => (
+                      <li key={page}>
+                        <Link to={`/pages/${page}`}>{page}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
