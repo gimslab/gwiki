@@ -18,7 +18,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     pagesWithStats.sort((a, b) => b.mtimeMs - a.mtimeMs);
 
-    res.json(pagesWithStats.map(page => page.name));
+    res.json(pagesWithStats.slice(0, 20).map(page => page.name));
   } catch (error) {
     console.error('Error reading data directory:', error);
     res.status(500).json({ message: 'Error reading wiki pages' });
