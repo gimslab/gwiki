@@ -85,7 +85,7 @@ router.post('/', async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'pageName and content are required' });
   }
 
-  const filePath = path.join(config.dataDirectoryPath, `${pageName}.md`);
+  const filePath = path.join(config.dataDirectoryPath, pageName);
 
   try {
     await fs.writeFile(filePath, content, { flag: 'wx' });

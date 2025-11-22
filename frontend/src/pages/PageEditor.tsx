@@ -19,33 +19,42 @@ const PageEditor: React.FC<PageEditorProps> = ({ onPageUpdate }) => {
   const [title, setTitle] = useState(pageName || '');
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const isEditing = !!pageName;
+  const [isNewPage, setIsNewPage] = useState(!pageName);
 
   useEffect(() => {
-    if (isEditing) {
+    if (pageName) {
       const fetchPage = async () => {
         try {
           const token = localStorage.getItem('gwiki-token');
           const response = await fetch(`/api/pages/${pageName}`, {
             headers: { 'Authorization': `Bearer ${token}` },
           });
-          if (!response.ok) throw new Error('Failed to fetch page');
-          const data = await response.text();
-          setContent(data);
+          if (response.status === 404) {
+            setIsNewPage(true);
+            setContent(''); // Ensure content is empty for a new page
+          } else if (!response.ok) {
+            throw new Error('Failed to fetch page');
+          } else {
+            const data = await response.text();
+            setContent(data);
+            setIsNewPage(false);
+          }
         } catch (err) {
           setError(getErrorMessage(err));
         }
       };
       fetchPage();
     }
-  }, [isEditing, pageName]);
+  }, [pageName]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
     const token = localStorage.getItem('gwiki-token');
-    const url = isEditing ? `/api/pages/${pageName}` : `/api/pages`;
-    const method = isEditing ? 'PUT' : 'POST';
+    // For new pages, the title might be edited, so the final pageName is `title`.
+    const finalPageName = isNewPage ? title : pageName;
+    const url = isNewPage ? `/api/pages` : `/api/pages/${pageName}`;
+    const method = isNewPage ? 'POST' : 'PUT';
 
     try {
       const response = await fetch(url, {
@@ -54,14 +63,14 @@ const PageEditor: React.FC<PageEditorProps> = ({ onPageUpdate }) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ pageName: title, content }),
+        body: JSON.stringify({ pageName: finalPageName, content }),
       });
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.message || 'Failed to save page');
       }
       onPageUpdate(); // Refresh the page list
-      navigate(`/pages/${title}`);
+      navigate(`/pages/${finalPageName}`);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -69,7 +78,7 @@ const PageEditor: React.FC<PageEditorProps> = ({ onPageUpdate }) => {
 
   return (
     <div className="page-editor">
-      <h2>{isEditing ? `Edit ${pageName}` : 'Create New Page'}</h2>
+      <h2>{isNewPage ? 'Create New Page' : `Edit ${pageName}`}</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="title">Title</label>
@@ -79,7 +88,7 @@ const PageEditor: React.FC<PageEditorProps> = ({ onPageUpdate }) => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            disabled={isEditing}
+            disabled={!isNewPage} // Disable title editing if it's an existing page
           />
         </div>
         <div className="form-group">
