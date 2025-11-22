@@ -16,9 +16,13 @@ const SearchPage: React.FC = () => {
   const [filenameMatches, setFilenameMatches] = useState<string[]>([]);
   const [contentMatches, setContentMatches] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [pageExists, setPageExists] = useState(false);
 
   useEffect(() => {
     if (query) {
+      setLoading(true);
+      setPageExists(false);
       const fetchResults = async () => {
         try {
           const token = localStorage.getItem('gwiki-token');
@@ -27,22 +31,40 @@ const SearchPage: React.FC = () => {
           });
           if (!response.ok) throw new Error('Search failed');
           const data = await response.json();
-          setFilenameMatches(data.filenameMatches || []);
+          const fetchedFilenameMatches = data.filenameMatches || [];
+          setFilenameMatches(fetchedFilenameMatches);
           setContentMatches(data.contentMatches || []);
+
+          const exactMatch = fetchedFilenameMatches.find((file: string) => file.toLowerCase() === `${query.toLowerCase()}.md`);
+          setPageExists(!!exactMatch);
+
         } catch (err) {
           setError(getErrorMessage(err));
+        } finally {
+          setLoading(false);
         }
       };
       fetchResults();
+    } else {
+        setLoading(false);
     }
   }, [query]);
 
   return (
     <div className="search-page">
       <h2>Search Results for "{query}"</h2>
-      {error && <p className="error-message">{error}</p>}
 
-      {filenameMatches.length === 0 && contentMatches.length === 0 ? (
+      {!loading && !pageExists && query && (
+        <div className="create-new-page-link">
+            <Link to={`/edit/${query}.md`}>Create New Page ({query}.md)</Link>
+        </div>
+      )}
+
+      {error && <p className="error-message">{error}</p>}
+      
+      {loading ? (
+        <p>Loading...</p>
+      ) : filenameMatches.length === 0 && contentMatches.length === 0 ? (
         <p>No results found.</p>
       ) : (
         <>
