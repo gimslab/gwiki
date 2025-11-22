@@ -249,6 +249,9 @@ export const convertMoniwikiToMarkdown = (moniwikiText: string): string => {
     // Old-style internal link: [PageName]
     processedLine = processedLine.replace(/(?<!\[)\[([^\[\]]+)\](?!\s*\()/g, '[[$1]]'); // Convert to MediaWiki style internal link, which can be further processed if needed
 
+    // Date Macro: [[Date(YYYY-MM-DD)]] -> `# YYYY-MM-DD`
+    processedLine = processedLine.replace(/\[\[Date\((.*?)\)\]\]/g, '`# $1`');
+
     // Links: [[https://example.com|Example]] -> [Example](https://example.com)
     processedLine = processedLine.replace(/\[\[(https?:\/\/[^|]+)\|([^\]]+)\]\]/g, '[$2]($1)');
     // Links: [[PageName]] -> [PageName](/pages/PageName.moniwiki) (assuming internal pages are at /pages/PageName.moniwiki)
