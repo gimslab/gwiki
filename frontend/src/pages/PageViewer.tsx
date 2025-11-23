@@ -5,6 +5,8 @@ import './PageViewer.css';
 
 import { parseMoniwiki, convertMoniwikiToMarkdown } from '../utils/moniwiki-parser';
 import ContentRenderer from '../components/ContentRenderer';
+import { useKeyboardShortcut } from '../hooks/useKeyboardShortcut';
+import { defaultShortcuts } from '../config/shortcuts';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -14,9 +16,8 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 interface PageViewerProps {
-
   onPageUpdate: () => void;
-
+  pages: string[];
 }
 
 
@@ -42,6 +43,16 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
   const [allPages, setAllPages] = useState<string[]>([]);
 
   const navigate = useNavigate();
+
+  useKeyboardShortcut(defaultShortcuts.editPage, () => {
+    if (pageFileName) {
+      navigate(`/edit/${pageFileName}`);
+    }
+  });
+
+  useKeyboardShortcut(defaultShortcuts.deletePage, () => {
+    handleDelete();
+  });
 
 
 
@@ -305,17 +316,17 @@ const PageViewer: React.FC<PageViewerProps> = ({ onPageUpdate }) => {
     };
 
     // Pre-process markdown to encode internal link URLs before passing to marked
-    const processedContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    const processedContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
       // only encode if it's NOT an external link
       const trimmedUrl = url.trim();
       if (!/^(https?:|ftp:|mailto:)/.test(trimmedUrl)) {
-        const encodedUrl = trimmedUrl.split('/').map(segment => encodeURIComponent(segment)).join('/');
+        const encodedUrl = trimmedUrl.split('/').map((segment: string) => encodeURIComponent(segment)).join('/');
         return `[${text}](${encodedUrl})`;
       }
       return `[${text}](${trimmedUrl})`; // Return with trimmed url
     });
 
-    const rawMarkup = marked(processedContent, { renderer });
+    const rawMarkup = marked(processedContent, { renderer }) as string;
     return { __html: rawMarkup };
   };
 

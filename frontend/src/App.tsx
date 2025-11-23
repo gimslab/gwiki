@@ -1,5 +1,5 @@
 import { Routes, Route, useNavigate, Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './App.css';
 import HomePage from './pages/HomePage';
 import PageViewer from './pages/PageViewer';
@@ -9,6 +9,8 @@ import GitPage from './pages/GitPage';
 import SearchPage from './pages/SearchPage';
 import GitStatusIndicator from './components/GitStatusIndicator';
 import TitleIndexPage from './pages/TitleIndexPage';
+import { useKeyboardShortcut } from './hooks/useKeyboardShortcut';
+import { defaultShortcuts } from './config/shortcuts';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('gwiki-token'));
@@ -16,6 +18,25 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [changedFilesCount, setChangedFilesCount] = useState(0);
   const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useKeyboardShortcut(defaultShortcuts.newPage, () => {
+    if (isAuthenticated) {
+      navigate('/new-page');
+    }
+  });
+
+  useKeyboardShortcut(defaultShortcuts.focusSearch, () => {
+    if (isAuthenticated && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  });
+
+  useKeyboardShortcut(defaultShortcuts.goHome, () => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  });
 
   const fetchGitStatus = async () => {
     try {
@@ -113,6 +134,7 @@ function App() {
           <>
             <form onSubmit={handleSearch} className="search-form">
               <input
+                ref={searchInputRef}
                 type="search"
                 placeholder="Search..."
                 value={searchQuery}
