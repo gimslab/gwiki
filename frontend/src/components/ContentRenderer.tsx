@@ -1,65 +1,96 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { marked } from 'marked';
+import { parseMoniwiki } from '../utils/moniwiki-parser';
 
 interface ContentRendererProps {
-  html: string;
-  className: string;
+  className?: string;
+  content: string;
+  allPages: string[];
+  isMoniwiki?: boolean;
 }
 
-const ContentRenderer: React.FC<ContentRendererProps> = ({ html, className }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+const ContentRenderer: React.FC<ContentRendererProps> = ({
+  className,
+  content,
+  allPages,
+  isMoniwiki,
+}) => {
+  const [renderedHtml, setRenderedHtml] = useState('');
 
   useEffect(() => {
-    if (!containerRef.current) return;
-
-    const container = containerRef.current;
-    // Clear previous content to avoid duplicating nodes on re-render
-    while (container.firstChild) {
-      container.removeChild(container.firstChild);
-    }
-    container.innerHTML = html;
-
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-
-    const textNodes: Node[] = [];
-    let currentNode = walker.nextNode();
-    while (currentNode) {
-      // Check if the parent is not an anchor or code tag
-      if (currentNode.parentElement?.tagName !== 'A' && currentNode.parentElement?.tagName !== 'CODE') {
-        textNodes.push(currentNode);
+    const renderMarkup = async () => {
+      if (isMoniwiki) {
+        const html = parseMoniwiki(content, allPages);
+        setRenderedHtml(html);
+        return;
       }
-      currentNode = walker.nextNode();
-    }
 
-    const urlRegex = /(https?:\/\/[^\s<>"'`]+)/g;
+      // For Markdown files, use marked with a custom renderer
+      const renderer = new marked.Renderer();
+      const originalLinkRenderer = renderer.link.bind(renderer);
 
-    textNodes.forEach(node => {
-      const text = node.textContent;
-      if (text && urlRegex.test(text)) {
-        const parent = node.parentNode;
-        if (parent) {
-          const fragment = document.createDocumentFragment();
-          const parts = text.split(urlRegex);
+      renderer.link = (props) => {
+        let { href, title, text } = props;
 
-          parts.forEach((part, index) => {
-            if (index % 2 === 1) { // This is a URL
-              const a = document.createElement('a');
-              a.href = part;
-              a.target = '_blank';
-              a.rel = 'noopener noreferrer';
-              a.textContent = part;
-              fragment.appendChild(a);
-            } else if (part) {
-              fragment.appendChild(document.createTextNode(part));
-            }
-          });
-          parent.replaceChild(fragment, node);
+        if (!href) {
+          return originalLinkRenderer(props);
         }
-      }
-    });
+        href = href.trim();
 
-  }, [html]);
+        if (/^(https?:|ftp:|mailto:)/.test(href)) {
+          const titleAttr = title ? ` title="${title}"` : '';
+          return `<a href="${href}"${titleAttr} target="_blank" rel="noopener noreferrer">${text}</a>`;
+        }
 
-  return <div ref={containerRef} className={className} />;
+        if (!href.startsWith('/') && !href.startsWith('#')) {
+          try {
+            const pageFileName = decodeURIComponent(href);
+            const pageExists = allPages.includes(pageFileName);
+            const pageNameForSearch = pageFileName.split('.').slice(0, -1).join('.') || pageFileName;
+            const searchUrl = `/search?q=${encodeURIComponent(pageNameForSearch)}`;
+
+            if (pageExists) {
+              if (pageFileName.endsWith('.moniwiki')) {
+                const titleAttr = title ? ` title="${title}"` : '';
+                return `<a href="/pages/${encodeURIComponent(pageFileName)}"${titleAttr} class="moniwiki-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+              }
+              return `<a href="/pages/${encodeURIComponent(pageFileName)}">${text}</a>`;
+            } else {
+              if (pageFileName.endsWith('.moniwiki')) {
+                return `<a href="${searchUrl}" class="red-link">${text} <span class="moniwiki-inline-tag">MONIWIKI</span></a>`;
+              }
+              return `<a href="${searchUrl}" class="red-link">${text}</a>`;
+            }
+          } catch (e) {
+            console.error('URIError during link processing:', e);
+          }
+        }
+        return originalLinkRenderer(props);
+      };
+
+      const processedContent = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text, url) => {
+        const trimmedUrl = url.trim();
+        if (!/^(https?:|ftp:|mailto:)/.test(trimmedUrl)) {
+          const encodedUrl = trimmedUrl.split('/').map((segment: string) => encodeURIComponent(segment)).join('/');
+          return `[${text}](${encodedUrl})`;
+        }
+        return `[${text}](${trimmedUrl})`;
+      });
+
+      // Use await to handle the async nature of marked
+      const rawMarkup = await marked(processedContent, { renderer });
+      setRenderedHtml(rawMarkup);
+    };
+
+    renderMarkup();
+  }, [content, allPages, isMoniwiki]);
+
+  return (
+    <div
+      className={className}
+      dangerouslySetInnerHTML={{ __html: renderedHtml }}
+    />
+  );
 };
 
 export default ContentRenderer;

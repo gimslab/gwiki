@@ -177,7 +177,7 @@ function App() {
       <main className="main">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/pages/:pageFileName" element={<PageViewer onPageUpdate={handlePageUpdate} pages={pages} />} />
+          <Route path="/pages/:pageFileName" element={<PageViewer onPageUpdate={handlePageUpdate} />} />
           <Route path="/login" element={<LoginPage onLogin={() => setIsAuthenticated(true)} />} />
           <Route path="/new-page" element={<PageEditor onPageUpdate={handlePageUpdate} />} />
           <Route path="/edit/:pageName" element={<PageEditor onPageUpdate={handlePageUpdate} />} />
