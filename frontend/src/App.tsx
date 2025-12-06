@@ -1,5 +1,5 @@
-import { Routes, Route, useNavigate, Link } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { Routes, Route, useNavigate, Link, useLocation } from 'react-router-dom';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import './App.css';
 import HomePage from './pages/HomePage';
 import PageViewer from './pages/PageViewer';
@@ -18,6 +18,8 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [changedFilesCount, setChangedFilesCount] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
+  const mainRef = useRef<HTMLElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useKeyboardShortcut(defaultShortcuts.newPage, () => {
@@ -108,6 +110,19 @@ function App() {
     }
   }, [isAuthenticated]);
 
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    if (mainRef.current) {
+      mainRef.current.scrollTop = 0;
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        if (mainRef.current) {
+          mainRef.current.scrollTop = 0;
+        }
+      });
+    }
+  }, [location.pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem('gwiki-token');
     setIsAuthenticated(false);
@@ -174,7 +189,7 @@ function App() {
           </>
         )}
       </aside>
-      <main className="main">
+      <main className="main" ref={mainRef}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/pages/:pageFileName" element={<PageViewer onPageUpdate={handlePageUpdate} />} />
