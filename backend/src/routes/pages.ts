@@ -5,13 +5,32 @@ import { config } from '../config';
 
 const router = Router();
 
+/**
+ * Safely constructs a file path from a user-provided page name,
+ * ensuring it remains within the configured data directory.
+ * @param pageName The page name from the user request.
+ * @returns The resolved, safe file path.
+ * @throws An error if a path traversal attempt is detected.
+ */
+function getSafePath(pageName: string): string {
+  const resolvedDataDirPath = path.resolve(config.dataDirectoryPath);
+  const resolvedFilePath = path.resolve(path.join(config.dataDirectoryPath, pageName));
+
+  // Ensure the resolved path is within the data directory
+  if (!resolvedFilePath.startsWith(resolvedDataDirPath + path.sep) && resolvedFilePath !== resolvedDataDirPath) {
+    throw new Error('Path traversal attempt detected');
+  }
+
+  return resolvedFilePath;
+}
+
 router.get('/', async (req: Request, res: Response) => {
   try {
     const files = await fs.readdir(config.dataDirectoryPath);
     const pageFiles = files.filter((file) => file.endsWith('.md') || file.endsWith('.moniwiki'));
 
     const pagesWithStats = await Promise.all(pageFiles.map(async (file) => {
-      const filePath = path.join(config.dataDirectoryPath, file);
+      const filePath = getSafePath(file);
       const stats = await fs.stat(filePath);
       return { name: file, mtimeMs: stats.mtimeMs };
     }));
@@ -50,12 +69,15 @@ router.get('/exists/:pageName', async (req: Request, res: Response) => {
 
   const otherExt = currentExt === 'md' ? 'moniwiki' : 'md';
   const otherFileName = `${baseName}.${otherExt}`;
-  const filePath = path.join(config.dataDirectoryPath, otherFileName);
-
+  
   try {
+    const filePath = getSafePath(otherFileName);
     await fs.access(filePath);
     res.json({ exists: true, fileName: otherFileName });
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Path traversal')) {
+      return res.status(400).json({ exists: false, message: 'Invalid page name' });
+    }
     res.json({ exists: false });
   }
 });
@@ -63,12 +85,15 @@ router.get('/exists/:pageName', async (req: Request, res: Response) => {
 router.get('/:pageName', async (req: Request, res: Response) => {
   const { pageName: encodedPageName } = req.params;
   const pageName = decodeURIComponent(encodedPageName);
-  const filePath = path.join(config.dataDirectoryPath, pageName);
-
+  
   try {
+    const filePath = getSafePath(pageName);
     const content = await fs.readFile(filePath, 'utf-8');
     res.send(content);
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Path traversal')) {
+      return res.status(400).json({ message: 'Invalid page name' });
+    }
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       res.status(404).json({ message: 'Page not found' });
     } else {
@@ -85,12 +110,14 @@ router.post('/', async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'pageName and content are required' });
   }
 
-  const filePath = path.join(config.dataDirectoryPath, pageName);
-
   try {
+    const filePath = getSafePath(pageName);
     await fs.writeFile(filePath, content, { flag: 'wx' });
     res.status(201).json({ message: 'Page created successfully' });
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Path traversal')) {
+      return res.status(400).json({ message: 'Invalid page name' });
+    }
     if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
       res.status(409).json({ message: 'Page already exists' });
     } else {
@@ -108,15 +135,17 @@ router.put('/:pageName', async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'content is required' });
   }
 
-  const filePath = path.join(config.dataDirectoryPath, pageName);
-
   try {
+    const filePath = getSafePath(pageName);
     // Check if file exists
     await fs.access(filePath);
     // File exists, so write to it
     await fs.writeFile(filePath, content);
     res.json({ message: 'Page updated successfully' });
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Path traversal')) {
+      return res.status(400).json({ message: 'Invalid page name' });
+    }
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       res.status(404).json({ message: 'Page not found' });
     } else {
@@ -128,12 +157,15 @@ router.put('/:pageName', async (req: Request, res: Response) => {
 
 router.delete('/:pageName', async (req: Request, res: Response) => {
   const { pageName } = req.params;
-  const filePath = path.join(config.dataDirectoryPath, pageName);
 
   try {
+    const filePath = getSafePath(pageName);
     await fs.unlink(filePath);
     res.json({ message: 'Page deleted successfully' });
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Path traversal')) {
+      return res.status(400).json({ message: 'Invalid page name' });
+    }
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       res.status(404).json({ message: 'Page not found' });
     } else {
@@ -150,9 +182,9 @@ router.post('/convert-moniwiki', async (req: Request, res: Response) => {
     return res.status(400).json({ message: 'originalFileName, newFileName, and markdownContent are required' });
   }
 
-  const newFilePath = path.join(config.dataDirectoryPath, newFileName);
-
   try {
+    const newFilePath = getSafePath(newFileName);
+
     // Check if the new file already exists to prevent overwriting
     await fs.access(newFilePath)
       .then(() => {
@@ -171,6 +203,9 @@ router.post('/convert-moniwiki', async (req: Request, res: Response) => {
         }
       });
   } catch (error) {
+    if (error instanceof Error && error.message.includes('Path traversal')) {
+      return res.status(400).json({ message: 'Invalid file name' });
+    }
     console.error(`Error converting Moniwiki file ${originalFileName} to Markdown:`, error);
     res.status(500).json({ message: 'Error converting Moniwiki file to Markdown' });
   }

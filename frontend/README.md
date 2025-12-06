@@ -71,3 +71,7 @@ export default defineConfig([
   },
 ])
 ```
+
+## Deployment
+
+For instructions on how to build the application for production and run it as a persistent service using `systemd`, please see the [Production Deployment and Service Setup Guide](../docs/deployment.md).
