@@ -14,9 +14,9 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/pages', authMiddleware, pagesRoutes);
-app.use('/api/git', authMiddleware, gitRoutes);
-app.use('/api/search', authMiddleware, searchRoutes);
+app.use('/api/pages', pagesRoutes);
+app.use('/api/git', gitRoutes);
+app.use('/api/search', searchRoutes);
 
 // Serve frontend
 const frontendDist = path.join(__dirname, '../../frontend/dist');

@@ -3,11 +3,13 @@
   margin: 0 auto;
 }
 
-.status-section, .commit-section {
+.status-section,
+.commit-section {
   margin-bottom: 2rem;
 }
 
-.status-section h3, .commit-section h3 {
+.status-section h3,
+.commit-section h3 {
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
@@ -55,11 +57,71 @@
 }
 
 .commit-section button:hover {
-  background-color: #0b5ed7; /* Darken primary */
+  background-color: #0b5ed7;
+  /* Darken primary */
 }
 
+
 .commit-section button:disabled {
-  background-color: #cccccc; /* Lighter grey for disabled state */
+  background-color: #cccccc;
+  /* Lighter grey for disabled state */
   cursor: not-allowed;
 }
 
+.status-section li {
+  background-color: #f8f9fa;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  margin-bottom: 0.5rem;
+  font-family: monospace;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.status-section li:hover {
+  background-color: #e9ecef;
+}
+
+.diff-section {
+  margin-top: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  padding: 1rem;
+  background-color: #fff;
+}
+
+.diff-section h4 {
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.diff-content {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.rollback-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.rollback-btn:hover {
+  background-color: #bb2d3b;
+}
+
+.rollback-btn:disabled {
+  background-color: #e0aeb3;
+  cursor: not-allowed;
+}

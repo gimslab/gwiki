@@ -7,7 +7,21 @@ const git = simpleGit(config.dataDirectoryPath);
 
 router.get('/status', async (req: Request, res: Response) => {
   try {
-    const status = await git.status();
+    // First, get status to find untracked files
+    let status = await git.status();
+
+    // Register untracked files with git add -N so they can be diffed
+    const untrackedFiles = status.not_added.filter(file =>
+      status.files.some(f => f.path === file && f.working_dir === '?')
+    );
+
+    if (untrackedFiles.length > 0) {
+      // git add -N (--intent-to-add) allows diff on new files
+      await git.raw(['add', '-N', ...untrackedFiles]);
+      // Re-fetch status after adding
+      status = await git.status();
+    }
+
     res.json(status);
   } catch (error) {
     console.error('Error getting git status:', error);
@@ -46,6 +60,46 @@ router.post('/commit', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error committing changes:', error);
     res.status(500).json({ message: 'Error committing changes' });
+  }
+});
+
+router.get('/diff', async (req: Request, res: Response) => {
+  const fileParam = req.query.file as string;
+
+  console.log(`[DEBUG] /diff requested for file param: ${fileParam}`);
+
+  if (!fileParam) {
+    console.log('[DEBUG] File path missing');
+    return res.status(400).json({ message: 'File path is required' });
+  }
+
+  // Decode URI component just in case express doesn't do it automatically for query params (it usually does, but let's be safe)
+  // Actually express decodes query params.
+  const file = fileParam;
+
+  try {
+    const diff = await git.diff(['--', file]);
+    console.log(`[DEBUG] Diff success. Length: ${diff.length}`);
+    res.json({ diff });
+  } catch (error) {
+    console.error('Error getting git diff:', error);
+    res.status(500).json({ message: 'Error getting git diff', error: String(error) });
+  }
+});
+
+router.post('/restore', async (req: Request, res: Response) => {
+  const { file } = req.body;
+
+  if (!file) {
+    return res.status(400).json({ message: 'File path is required' });
+  }
+
+  try {
+    await git.checkout(file);
+    res.json({ message: 'File restored successfully' });
+  } catch (error) {
+    console.error('Error restoring file:', error);
+    res.status(500).json({ message: 'Error restoring file' });
   }
 });
 
