@@ -52,7 +52,9 @@ const PageEditor: React.FC<PageEditorProps> = ({ onPageUpdate }) => {
     setError(null);
     const token = localStorage.getItem('gwiki-token');
     // For new pages, the title might be edited, so the final pageName is `title`.
-    const finalPageName = isNewPage ? title : pageName;
+    const finalPageName = isNewPage
+      ? (title.endsWith('.md') || title.endsWith('.moniwiki') ? title : `${title}.md`)
+      : pageName;
     const url = isNewPage ? `/api/pages` : `/api/pages/${pageName}`;
     const method = isNewPage ? 'POST' : 'PUT';
 

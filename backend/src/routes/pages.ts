@@ -48,7 +48,7 @@ router.get('/all', async (req: Request, res: Response) => {
   try {
     const files = await fs.readdir(config.dataDirectoryPath);
     const pageFiles = files.filter((file) => file.endsWith('.md') || file.endsWith('.moniwiki'));
-    
+
     pageFiles.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 
     res.json(pageFiles);
@@ -69,7 +69,7 @@ router.get('/exists/:pageName', async (req: Request, res: Response) => {
 
   const otherExt = currentExt === 'md' ? 'moniwiki' : 'md';
   const otherFileName = `${baseName}.${otherExt}`;
-  
+
   try {
     const filePath = getSafePath(otherFileName);
     await fs.access(filePath);
@@ -85,7 +85,7 @@ router.get('/exists/:pageName', async (req: Request, res: Response) => {
 router.get('/:pageName', async (req: Request, res: Response) => {
   const { pageName: encodedPageName } = req.params;
   const pageName = decodeURIComponent(encodedPageName);
-  
+
   try {
     const filePath = getSafePath(pageName);
     const content = await fs.readFile(filePath, 'utf-8');
@@ -104,10 +104,15 @@ router.get('/:pageName', async (req: Request, res: Response) => {
 });
 
 router.post('/', async (req: Request, res: Response) => {
-  const { pageName, content } = req.body;
+  let { pageName, content } = req.body;
 
   if (!pageName || content === undefined) {
     return res.status(400).json({ message: 'pageName and content are required' });
+  }
+
+  // Auto-append .md if no valid extension is provided
+  if (!pageName.endsWith('.md') && !pageName.endsWith('.moniwiki')) {
+    pageName = `${pageName}.md`;
   }
 
   try {
