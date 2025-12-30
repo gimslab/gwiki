@@ -117,6 +117,35 @@ const GitPage: React.FC<GitPageProps> = ({ onCommit }) => {
     }
   };
 
+  const handleDeleteFile = async () => {
+    if (!selectedFile || !confirm(`Are you sure you want to PERMANENTLY delete the new file ${selectedFile}?`)) return;
+
+    try {
+      const token = localStorage.getItem('gwiki-token');
+      const response = await fetch(`/api/pages/${encodeURIComponent(selectedFile)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to delete file');
+      }
+
+      setSelectedFile(null);
+      setDiffContent(null);
+      fetchStatus();
+      onCommit(); // Refresh header
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
+  const isNewFile = status?.created.includes(selectedFile || '') ||
+    status?.files.find(f => f.path === selectedFile)?.working_dir === '?';
+
   useEffect(() => {
     fetchStatus();
   }, []);
@@ -177,7 +206,11 @@ const GitPage: React.FC<GitPageProps> = ({ onCommit }) => {
         <div className="diff-section" ref={diffSectionRef}>
           <h4>
             Diff: {selectedFile}
-            <button className="rollback-btn" onClick={handleRollback}>Rollback Changes</button>
+            {isNewFile ? (
+              <button className="delete-btn" onClick={handleDeleteFile}>Delete File</button>
+            ) : (
+              <button className="rollback-btn" onClick={handleRollback}>Rollback Changes</button>
+            )}
           </h4>
           <pre className="diff-content">{diffContent}</pre>
         </div>

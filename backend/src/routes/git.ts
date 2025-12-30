@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express';
 import simpleGit from 'simple-git';
+import * as fs from 'fs';
+import * as path from 'path';
 import { config } from '../config';
 
 const router = Router();
@@ -95,7 +97,20 @@ router.post('/restore', async (req: Request, res: Response) => {
   }
 
   try {
-    await git.checkout(file);
+    const status = await git.status();
+    const fileStatus = status.files.find(f => f.path === file);
+
+    if (fileStatus && (fileStatus.working_dir === '?' || fileStatus.index === 'A')) {
+      // It's a new file (untracked or intent-to-add)
+      const filePath = path.join(config.dataDirectoryPath, file);
+      if (fs.existsSync(filePath)) {
+        await fs.promises.unlink(filePath);
+      }
+    } else {
+      // It's a modified or deleted file
+      await git.checkout(file);
+    }
+
     res.json({ message: 'File restored successfully' });
   } catch (error) {
     console.error('Error restoring file:', error);
