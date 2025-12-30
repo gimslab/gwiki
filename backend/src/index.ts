@@ -22,11 +22,48 @@ app.use('/api/search', searchRoutes);
 const frontendDist = path.join(__dirname, '../../frontend/dist');
 app.use(express.static(frontendDist));
 
+import http from 'http';
+import https from 'https';
+import fs from 'fs';
+
+// ... (rest of the file remains the same until the listen part)
+
 // Catch-all to serve index.html for client-side routing
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
-app.listen(config.port, () => {
-  console.log(`Server is running on http://localhost:${config.port}`);
-});
+if (config.sslKeyPath && config.sslCertPath) {
+  try {
+    const options = {
+      key: fs.readFileSync(config.sslKeyPath),
+      cert: fs.readFileSync(config.sslCertPath),
+    };
+
+    https.createServer(options, app).listen(config.port, () => {
+      console.log(`HTTPS Server is running on https://localhost:${config.port}`);
+    });
+
+    // Create a separate HTTP server to redirect to HTTPS
+    const httpApp = express();
+    httpApp.get(/.*/, (req, res) => {
+      res.redirect(`https://localhost:${config.port}` + req.url);
+    });
+
+    const httpServerPort = 8000;
+    http.createServer(httpApp).listen(httpServerPort, () => {
+        console.log(`HTTP redirect server is running on http://localhost:${httpServerPort}`);
+    });
+
+  } catch (error) {
+    console.error('Could not start HTTPS server.', error);
+    console.log('Falling back to HTTP.');
+    http.createServer(app).listen(config.port, () => {
+      console.log(`Server is running on http://localhost:${config.port}`);
+    });
+  }
+} else {
+  http.createServer(app).listen(config.port, () => {
+    console.log(`Server is running on http://localhost:${config.port}`);
+  });
+}

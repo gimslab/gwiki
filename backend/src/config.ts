@@ -16,4 +16,6 @@ export const config = {
   adminPasswordHash: getConfig('ADMIN_PASSWORD_HASH'),
   jwtSecret: getConfig('JWT_SECRET'),
   port: process.env.PORT || '8080',
+  sslKeyPath: process.env.SSL_KEY_PATH,
+  sslCertPath: process.env.SSL_CERT_PATH,
 };
