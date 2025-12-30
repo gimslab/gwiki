@@ -46,6 +46,19 @@ if (config.sslKeyPath && config.sslCertPath) {
 
     // Create a separate HTTP server to redirect to HTTPS
     const httpApp = express();
+
+    const publicDir = path.join(__dirname, '../public');
+    const wellKnownDir = path.join(publicDir, '.well-known');
+    console.log(`Serving .well-known from: ${wellKnownDir}`);
+
+    // Serve ACME challenge files for Let's Encrypt
+    httpApp.use('/.well-known', express.static(wellKnownDir));
+
+    // Prevent redirect for ACME challenges if file not found
+    httpApp.use('/.well-known', (req, res) => {
+      res.status(404).send('Not Found');
+    });
+
     httpApp.get(/.*/, (req, res) => {
       res.redirect(`https://localhost:${config.port}` + req.url);
     });
