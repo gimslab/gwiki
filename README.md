@@ -119,6 +119,6 @@ HTTPS 적용을 위해 `backend/.env` 파일에 다음 설정이 포함되어야
 # ... 기존 설정 ...
 
 # SSL Certificate paths (Let's Encrypt)
-SSL_KEY_PATH=/etc/letsencrypt/live/h.gimslab.com/privkey.pem
-SSL_CERT_PATH=/etc/letsencrypt/live/h.gimslab.com/fullchain.pem
+SSL_KEY_PATH=/etc/letsencrypt/live/my-site.com/privkey.pem
+SSL_CERT_PATH=/etc/letsencrypt/live/my-site.com/fullchain.pem
 ```
