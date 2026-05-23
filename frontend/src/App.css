@@ -193,3 +193,163 @@
   background-color: #0b5ed7; /* Darken primary */
 
 }
+
+/* Desktop default hides the toggle buttons */
+.menu-toggle-button,
+.search-toggle-button,
+.search-close-button {
+  display: none;
+}
+
+/* Sidebar Backdrop default */
+.sidebar-backdrop {
+  display: none;
+}
+
+/* Body scroll lock class */
+body.sidebar-open-active {
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .app {
+    grid-template-areas:
+      'header'
+      'main';
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    position: relative;
+    padding: 0.75rem 1rem;
+    height: 60px; /* Fixed height for clean alignment */
+  }
+
+  .logo.hidden-mobile {
+    display: none !important;
+  }
+
+  .header-right-items.hidden-mobile {
+    display: none !important;
+  }
+
+  /* Hamburger Menu Toggle */
+  .menu-toggle-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 24px;
+    height: 18px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1010;
+  }
+
+  .menu-toggle-button .bar {
+    width: 24px;
+    height: 2px;
+    background-color: var(--text-color);
+    border-radius: 2px;
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Hamburger transition to 'X' */
+  .menu-toggle-button.active .bar:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .menu-toggle-button.active .bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menu-toggle-button.active .bar:nth-child(3) {
+    transform: translateY(6px) rotate(-45deg);
+  }
+
+  /* Search toggle icon button on mobile */
+  .search-toggle-button {
+    display: block;
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-left: auto;
+  }
+
+  /* Search close button inside expanded form */
+  .search-close-button {
+    display: block;
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  /* Hide standard search form on mobile unless expanded */
+  .search-form {
+    display: none;
+  }
+
+  /* Expanded search overlay on mobile */
+  .search-form.expanded {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--header-bg);
+    padding: 0 1rem;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1005;
+  }
+
+  .search-form.expanded input {
+    flex-grow: 1;
+    max-width: none;
+  }
+
+  /* Sidebar Drawer on mobile */
+  .sidebar {
+    position: fixed;
+    top: 60px; /* Header height */
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+    overflow-y: auto;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Backdrop Overlay */
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+  }
+
+  .main {
+    padding: 1rem;
+    overflow-x: hidden;
+  }
+}

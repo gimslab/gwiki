@@ -17,6 +17,8 @@ function App() {
   const [pages, setPages] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [changedFilesCount, setChangedFilesCount] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const mainRef = useRef<HTMLElement>(null);
@@ -29,8 +31,13 @@ function App() {
   });
 
   useKeyboardShortcut(defaultShortcuts.focusSearch, () => {
-    if (isAuthenticated && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (isAuthenticated) {
+      setIsSearchExpanded(true);
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 50);
     }
   });
 
@@ -123,6 +130,21 @@ function App() {
     }
   }, [location.pathname]);
 
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.classList.add('sidebar-open-active');
+    } else {
+      document.body.classList.remove('sidebar-open-active');
+    }
+    return () => {
+      document.body.classList.remove('sidebar-open-active');
+    };
+  }, [isSidebarOpen]);
+
   const handleLogout = () => {
     localStorage.removeItem('gwiki-token');
     setIsAuthenticated(false);
@@ -137,17 +159,42 @@ function App() {
   const handleSearch = (event: React.FormEvent) => {
     event.preventDefault();
     if (searchQuery.trim()) {
+      setIsSearchExpanded(false);
       navigate(`/search?q=${searchQuery.trim()}`);
     }
   };
 
   return (
-    <div className="app">
+    <div className={`app ${isSidebarOpen ? 'sidebar-open' : ''}`}>
       <header className="header">
-        <h1><Link to="/">gwiki</Link></h1>
+        {isAuthenticated && (
+          <button
+            type="button"
+            className={`menu-toggle-button ${isSidebarOpen ? 'active' : ''}`}
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            aria-label="Toggle menu"
+          >
+            <span className="bar"></span>
+            <span className="bar"></span>
+            <span className="bar"></span>
+          </button>
+        )}
+        <h1 className={`logo ${isSearchExpanded ? 'hidden-mobile' : ''}`}>
+          <Link to="/">gwiki</Link>
+        </h1>
         {isAuthenticated && (
           <>
-            <form onSubmit={handleSearch} className="search-form">
+            <form onSubmit={handleSearch} className={`search-form ${isSearchExpanded ? 'expanded' : ''}`}>
+              {isSearchExpanded && (
+                <button
+                  type="button"
+                  className="search-close-button"
+                  onClick={() => setIsSearchExpanded(false)}
+                  aria-label="Close search"
+                >
+                  ✕
+                </button>
+              )}
               <input
                 ref={searchInputRef}
                 type="search"
@@ -156,7 +203,24 @@ function App() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </form>
-            <div className="header-right-items">
+            {!isSearchExpanded && (
+              <button
+                type="button"
+                className="search-toggle-button"
+                onClick={() => {
+                  setIsSearchExpanded(true);
+                  setTimeout(() => {
+                    if (searchInputRef.current) {
+                      searchInputRef.current.focus();
+                    }
+                  }, 50);
+                }}
+                aria-label="Open search"
+              >
+                🔍
+              </button>
+            )}
+            <div className={`header-right-items ${isSearchExpanded ? 'hidden-mobile' : ''}`}>
               <GitStatusIndicator changedFilesCount={changedFilesCount} />
               <button onClick={handleLogout} className="logout-button">
                 Logout
@@ -165,7 +229,7 @@ function App() {
           </>
         )}
       </header>
-      <aside className="sidebar">
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
         <h2>Pages</h2>
         {isAuthenticated && (
           <>
@@ -189,6 +253,12 @@ function App() {
           </>
         )}
       </aside>
+      {isSidebarOpen && (
+        <div
+          className="sidebar-backdrop"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
       <main className="main" ref={mainRef}>
         <Routes>
           <Route path="/" element={<HomePage />} />

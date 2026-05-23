@@ -24,3 +24,5 @@ yarn-error.log*
 backend_dev.log
 frontend_dev.log
 backend/certs/
+/GEMINI.md
+
