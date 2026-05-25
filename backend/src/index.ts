@@ -71,12 +71,12 @@ if (config.sslKeyPath && config.sslCertPath) {
   } catch (error) {
     console.error('Could not start HTTPS server.', error);
     console.log('Falling back to HTTP.');
-    http.createServer(app).listen(config.port, () => {
-      console.log(`Server is running on http://localhost:${config.port}`);
+    http.createServer(app).listen(Number(config.port), '127.0.0.1', () => {
+      console.log(`Server is running on http://127.0.0.1:${config.port}`);
     });
   }
 } else {
-  http.createServer(app).listen(config.port, () => {
-    console.log(`Server is running on http://localhost:${config.port}`);
+  http.createServer(app).listen(Number(config.port), '127.0.0.1', () => {
+    console.log(`Server is running on http://127.0.0.1:${config.port}`);
   });
 }
